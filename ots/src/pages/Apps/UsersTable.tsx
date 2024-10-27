@@ -263,7 +263,6 @@ const Dashboard = () => {
                                     idAccessor='_id'
                                     highlightOnHover
                                     striped
-                                    withBorder
                                     withColumnBorders
                                 />
                         </div>

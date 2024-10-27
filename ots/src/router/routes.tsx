@@ -1,8 +1,5 @@
 import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
-import Projects from '../pages/Apps/ProjectDash';
-import ProjectDetail from '../pages/Apps/ProjectDetail';
-import ProjectEdit from '../pages/Apps/ProjectEdit';
 const Index = lazy(() => import('../pages/Apps/Dashboard'));
 const NotFound = lazy(() => import('../pages/Apps/404'));
 const CustomerTable = lazy(() => import('../pages/Apps/CustomerTable'))
