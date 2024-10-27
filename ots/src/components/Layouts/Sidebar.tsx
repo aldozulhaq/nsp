@@ -69,7 +69,7 @@ const Sidebar = () => {
 
     const checkIfAdmin = () => {
         const role = localStorage.getItem('role')
-        if(role?.toLowerCase() == 'user_ots') {
+        if(role?.toLowerCase() !== 'user_ots') {
             return (<li className="menu nav-item">
             <NavLink to="/Users" className="group">
                 <div className="flex items-center">
