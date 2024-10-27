@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '../config/api';
 
 const GetCustomerNameById = async (_id : any) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/${_id}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -15,7 +15,7 @@ const GetCustomerNameById = async (_id : any) => {
 }
 
 const GetCustomers = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -29,7 +29,7 @@ const GetCustomers = async () => {
 }
 
 const GetCustomerArchives = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/archives`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/archives`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -43,7 +43,7 @@ const GetCustomerArchives = async () => {
 }
 
 const GetCustomerById = async (_id : any) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/getCustId/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/getCustId/${_id}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -57,7 +57,7 @@ const GetCustomerById = async (_id : any) => {
 }
 
 const PostCustomer = async (name:string, desc:string) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer`, {
+    const res = await fetch(`${API_BASE_URL}/costumer`, {
         method: 'POST',
         headers: {
             "Content-Type" : 'application/json', 
@@ -78,7 +78,7 @@ const PostCustomer = async (name:string, desc:string) => {
 }
 
 const EditCustomer = async (_id:any, name:string, desc:string) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/up/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/up/${_id}`, {
         method: 'PUT',
         headers: {
             "Content-Type" : 'application/json', 
@@ -99,7 +99,7 @@ const EditCustomer = async (_id:any, name:string, desc:string) => {
 }
 
 const delCustomer = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/del/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/del/${_id}`, {
         method: 'DELETE',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -114,7 +114,7 @@ const delCustomer = async (_id:any) => {
 }
 
 const softDelCustomer = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/archive/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/archive/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -129,7 +129,7 @@ const softDelCustomer = async (_id:any) => {
 }
 
 const restoreCustomer = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/costumer/restore/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/costumer/restore/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }

@@ -6,7 +6,7 @@ const loginUser = async (email: string, password: string) => {
         throw Error('All fields are required')
     }
 
-    const res = await fetch(`${API_BASE_URL}/api/users/login`, {
+    const res = await fetch(`${API_BASE_URL}/users/login`, {
         method: 'POST',
         headers: {
             'Content-Type' : 'application/json'
@@ -36,7 +36,7 @@ const registerUser = async (username:string, email:string, role:string, password
         throw Error("Passwords do not match")
     }
 
-    const res = await fetch(`${API_BASE_URL}/api/users/`, {
+    const res = await fetch(`${API_BASE_URL}/users/`, {
         method: 'POST',
         headers: {
             'Content-Type' : 'application/json',
@@ -56,7 +56,7 @@ const registerUser = async (username:string, email:string, role:string, password
 }
 
 const GetSicNameById = async (_id: any) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/${_id}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -70,7 +70,7 @@ const GetSicNameById = async (_id: any) => {
 }
 
 const GetSicByEmail = async (email: any) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/email/${email}`, {
+    const res = await fetch(`${API_BASE_URL}/users/email/${email}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -84,7 +84,7 @@ const GetSicByEmail = async (email: any) => {
 }
 
 const GetEmailById = async (_id: any) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/getEmail/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/getEmail/${_id}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -106,7 +106,7 @@ const ChangePassword = async (_id:any, password:string, passwordConfirm:string) 
         throw Error("Passwords do not match")
     }
 
-    const res = await fetch(`${API_BASE_URL}/api/users/changePW/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/changePW/${_id}`, {
         method: 'PUT',
         headers: {
             'Content-Type' : 'application/json',
@@ -123,7 +123,7 @@ const ChangePassword = async (_id:any, password:string, passwordConfirm:string) 
 }
 
 const GetUsers = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/users/`, {
+    const res = await fetch(`${API_BASE_URL}/users/`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -137,7 +137,7 @@ const GetUsers = async () => {
 }
 
 const GetUsersArc = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/users/archives/`, {
+    const res = await fetch(`${API_BASE_URL}/users/archives/`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -151,7 +151,7 @@ const GetUsersArc = async () => {
 }
 
 const softDelUser = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/archive/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/archive/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -166,7 +166,7 @@ const softDelUser = async (_id:any) => {
 }
 
 const EditUser = async (_id:any, username:string, email:string, role:string) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/up/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/up/${_id}`, {
         method: 'PUT',
         headers: {
             "Content-Type" : 'application/json', 
@@ -188,7 +188,7 @@ const EditUser = async (_id:any, username:string, email:string, role:string) => 
 }
 
 const restoreUser = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/restore/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/restore/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -203,7 +203,7 @@ const restoreUser = async (_id:any) => {
 }
 
 const delUser = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/users/del/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/users/del/${_id}`, {
         method: 'DELETE',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }

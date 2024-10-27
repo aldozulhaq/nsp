@@ -2,7 +2,7 @@ import { API_BASE_URL } from '../config/api';
 
 // Get opps
 const getOpps = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/opps`, {
+    const res = await fetch(`${API_BASE_URL}/opps`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
          
         }
@@ -17,7 +17,7 @@ const getOpps = async () => {
 }
 
 const getOppArchives = async () => {
-    const res = await fetch(`${API_BASE_URL}/api/opps/archives`, {
+    const res = await fetch(`${API_BASE_URL}/opps/archives`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
          
         }
@@ -32,7 +32,7 @@ const getOppArchives = async () => {
 }
 
 const getOppById = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/opps/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/opps/${_id}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -47,7 +47,7 @@ const getOppById = async (_id:any) => {
 
 
 const softDelOpp = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/opps/archive/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/opps/archive/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -62,7 +62,7 @@ const softDelOpp = async (_id:any) => {
 }
 
 const restoreOpp = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/opps/restore/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/opps/restore/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -78,7 +78,7 @@ const restoreOpp = async (_id:any) => {
 
 
 const handoverOpp = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/opps/handover/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/opps/handover/${_id}`, {
         method: 'PUT',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -93,7 +93,7 @@ const handoverOpp = async (_id:any) => {
 }
 
 const delOpp = async (_id:any) => {
-    const res = await fetch(`${API_BASE_URL}/api/opps/del/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/opps/del/${_id}`, {
         method: 'DELETE',
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
@@ -120,7 +120,7 @@ const postOpp = async (
         keterangan: string
         ) => {
     
-    const res = await fetch(`${API_BASE_URL}/api/opps`, {
+    const res = await fetch(`${API_BASE_URL}/opps`, {
         method: 'POST',
         headers: {
             "Content-Type" : 'application/json', 
@@ -162,7 +162,7 @@ const updateOpp = async (_id: any,
     keterangan: string
     ) => {
 
-const res = await fetch(`${API_BASE_URL}/api/opps/up/${_id}`, {
+const res = await fetch(`${API_BASE_URL}/opps/up/${_id}`, {
     method: 'PUT',
     headers: {
         "Content-Type" : 'application/json', 
