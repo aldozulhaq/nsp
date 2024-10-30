@@ -69,6 +69,7 @@ const Dashboard = () => {
              const filteredUsers = allUsers
              .filter((item:any) => {
                  return item.username.toLowerCase().includes(search.toLowerCase()) &&
+                 (item.role.toLowerCase().includes('ots')) &&
                  !(item.role.toLowerCase().includes('dev'))
              })
              setUsers(filteredUsers)
@@ -90,7 +91,12 @@ const Dashboard = () => {
         },
         {
             accessor: 'role',
-            title: 'Role'
+            title: 'Role',
+            render: (user:any) => (
+                <span>
+                    {user.role.split('_')[0]}
+                </span>
+            )
         },
         {
             accessor: 'actions',

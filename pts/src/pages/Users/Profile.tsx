@@ -101,7 +101,7 @@ const Profile = () => {
                             <ul className="mt-5 flex flex-col max-w-[160px] m-auto space-y-4 font-semibold text-white-dark">
                                 <li className="flex items-center gap-2">
                                     <IconCoffee className="shrink-0" />
-                                    {user.role}
+                                    {user.role?.split('_')[0]}
                                 </li>
                                 {/* <li className="flex items-center gap-2">
                                     <IconCalendar className="shrink-0" />

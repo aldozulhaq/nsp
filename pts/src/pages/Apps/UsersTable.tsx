@@ -69,8 +69,8 @@ const Dashboard = () => {
              const filteredUsers = allUsers
              .filter((item:any) => {
                  return item.username.toLowerCase().includes(search.toLowerCase()) &&
-                 (item.role.toLowerCase().includes('user_pts')) ||
-                 (item.role.toLowerCase().includes('admin_pts'))
+                 (item.role.toLowerCase().includes('pts')) &&
+                 !(item.role.toLowerCase().includes('dev'))
              })
              setUsers(filteredUsers)
     }
@@ -83,7 +83,7 @@ const Dashboard = () => {
         {
             accessor: 'username',
             title: 'username',
-            width: 200
+            width: 200,
         },
         {
             accessor: 'email',
@@ -91,7 +91,12 @@ const Dashboard = () => {
         },
         {
             accessor: 'role',
-            title: 'Role'
+            title: 'Role',            
+            render: (user:any) => (
+                <span>
+                    {user.role.split('_')[0]}
+                </span>
+            )
         },
         {
             accessor: 'actions',

@@ -109,7 +109,7 @@ const Header = () => {
                                                     {user.email}
                                                 </h4>
                                                 <button type="button" className="text-black/60 hover:text-primary dark:text-dark-light/60 dark:hover:text-white">
-                                                    {user.role}
+                                                    {user.role?.split('_')[0]}
                                                 </button>
                                             </div>
                                         </div>

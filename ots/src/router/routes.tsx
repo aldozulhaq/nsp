@@ -1,5 +1,6 @@
-import { lazy } from 'react';
-import { Navigate } from 'react-router-dom';
+import { lazy, useContext } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { UserContext } from '../contexts/UserContext';
 const Index = lazy(() => import('../pages/Apps/Dashboard'));
 const NotFound = lazy(() => import('../pages/Apps/404'));
 const CustomerTable = lazy(() => import('../pages/Apps/CustomerTable'))
@@ -76,7 +77,9 @@ const checkUserAuthentication = () => {
 function CheckUserRolePermission(role:string) {
     const uRole = localStorage.getItem("role")
     // if admin or dev or role is same as user role
-    if(uRole == "admin_ots" || uRole == "admin" || uRole == role || uRole == "dev") {
+    if(uRole == "admin" || uRole == "admin_ots" || uRole == "dev"
+        || (uRole?.toLowerCase().includes("ots") && uRole?.toLowerCase().includes(role))
+    ) {
         return true
     } else
     return false
@@ -84,7 +87,7 @@ function CheckUserRolePermission(role:string) {
 
 function PrivateRouteOTS({ children }:any) {
     const isAuthenticated = checkUserAuthentication();
-    return isAuthenticated && CheckUserRolePermission("user_ots") ? children : <Navigate to="/login" />;
+    return isAuthenticated && CheckUserRolePermission("user") ? children : handleLogout();
 }
 
 function PrivateRoute({ children }:any) {
@@ -100,6 +103,19 @@ function AdminRoute({ children }:any) {
 function PublicRoute({children}:any) {
     const isAuthenticated = checkUserAuthentication();
     return !isAuthenticated ? children : <Navigate to="/" />;
+}
+
+const handleLogout = () => {
+    const { user, setUser } = useContext(UserContext)
+    const navigate = useNavigate()
+
+    setUser({email: null, role: null})
+    localStorage.removeItem('email')
+    localStorage.removeItem('token')
+    localStorage.removeItem('role')
+    localStorage.removeItem('username')
+
+    navigate("/login")
 }
 
 const routes = [
