@@ -22,14 +22,11 @@ import { ChangePassword, GetSicByEmail } from '../../controllers/usersController
 import { UserContext } from '../../contexts/UserContext';
 import IconBolt from '../../components/Icon/IconBolt';
 import IconWheel from '../../components/Icon/IconWheel';
-import { OppContext } from '../../contexts/oppContext';
-import { getOpps } from '../../controllers/oppsController';
 import { Dialog, Transition } from '@headlessui/react';
 import IconX from '../../components/Icon/IconX';
 import Swal from 'sweetalert2';
 
 const Profile = () => {
-    const { opps, setOpps } = useContext(OppContext) 
     const { user, setUser } = useContext(UserContext)
     
     const [ sic, setSic ] = useState<any>('')
@@ -53,21 +50,6 @@ const Profile = () => {
             console.error('Error fetching sic:', err);
         }
     }
-
-    const fetchOpps = async () => {
-        const data = await getOpps()
-            
-            const filteredOpps = data.opps.filter((item:any) => {
-                return item.sic.includes(sic._id)
-            })
-
-            setOpps(filteredOpps.slice(0,7))
-    }
-
-    useEffect(() => {
-        fetchSIC()
-        fetchOpps()
-    }, [opps, sic])
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
@@ -168,7 +150,7 @@ const Profile = () => {
                         </div>
                         <div className="mb-5">
                             <div className="table-responsive text-[#515365] dark:text-white-light font-semibold">
-                                <table className="whitespace-nowrap">
+                                {/* <table className="whitespace-nowrap">
                                     <thead>
                                         <tr>
                                             <th>Opportunity Name</th>
@@ -212,7 +194,7 @@ const Profile = () => {
                                     </tr>
                                     )}
                                     </tbody>
-                                </table>
+                                </table> */}
                             </div>
                         </div>
                     </div>
