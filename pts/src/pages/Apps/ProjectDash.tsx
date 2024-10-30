@@ -157,7 +157,7 @@ const Projects = () => {
         },
         {
             accessor: 'cost',
-            title: 'Cost (Rp)',
+            title: 'Total Cost (Rp)',
             titleAlign: 'right',
             render: (data:any) => (<span className="flex justify-end mt-3">{
                 (
@@ -212,25 +212,25 @@ const Projects = () => {
                                                     {/* Material Cost */}
                                                     <div className="flex justify-between items-center py-1">
                                                         <span className="text-gray-600">Material Cost:</span>
-                                                        <span>{record.costs?(record.costs.material_cost || "N/A"): "N/A"}</span>
+                                                        <span>{record.costs?(record.costs.material_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
                                                     </div>
 
                                                     {/* Machine Cost */}
                                                     <div className="flex justify-between items-center py-1">
                                                         <span className="text-gray-600">Machine Cost:</span>
-                                                        <span>{record.costs?(record.costs.machine_cost || "N/A"): "N/A"}</span>
+                                                        <span>{record.costs?(record.costs.machine_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
                                                     </div>
 
                                                     {/* Manpower Cost */}
                                                     <div className="flex justify-between items-center py-1">
                                                         <span className="text-gray-600">Manpower Cost:</span>
-                                                        <span>{record.costs?(record.costs.manpower_cost || "N/A"): "N/A"}</span>
+                                                        <span>{record.costs?(record.costs.manpower_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
                                                     </div>
 
                                                     {/* Misc Cost */}
                                                     <div className="flex justify-between items-center py-1">
                                                         <span className="text-gray-600">Misc Cost:</span>
-                                                        <span>{record.costs?(record.costs.other_cost || 'N/A'): "N/A"}</span>
+                                                        <span>{record.costs?(record.costs.other_cost || 'N/A').toLocaleString('id-ID'): "N/A"}</span>
                                                     </div>
 
                                                     {/* Button container */}

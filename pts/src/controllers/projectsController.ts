@@ -1,7 +1,7 @@
-// Get opps
+import { API_BASE_URL } from '../config/api';
 
 const getProjects = async () => {
-    const res = await fetch('/api/project', {
+    const res = await fetch(`${API_BASE_URL}/project`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         mode: 'no-cors',
         }
@@ -16,7 +16,7 @@ const getProjects = async () => {
 }
 
 const getProjectDetail = async (_id:any) => {
-    const res = await fetch(`/api/project/detail/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/project/detail/${_id}`, {
         headers: { "Authorization" : `Bearer ${localStorage.getItem("token")}`,
         }
     })
@@ -30,7 +30,7 @@ const getProjectDetail = async (_id:any) => {
 }
 
 const updateProject = async (_id: any, data:any) => {
-    const res = await fetch(`/api/project/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/project/${_id}`, {
         method: 'PUT',
         headers: {
             "Content-Type": 'application/json',
@@ -48,7 +48,7 @@ const updateProject = async (_id: any, data:any) => {
 }
 
 const archiveProject = async (_id: any) => {
-    const res = await fetch(`/api/project/archive/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/project/archive/${_id}`, {
         method: 'PUT',
         headers: {
             "Content-Type": 'application/json',
@@ -65,7 +65,7 @@ const archiveProject = async (_id: any) => {
 }
 
 const restoreProject = async (_id: any) => {
-    const res = await fetch(`/api/project/restore/${_id}`, {
+    const res = await fetch(`${API_BASE_URL}/project/restore/${_id}`, {
         method: 'PUT',
         headers: {
             "Content-Type": 'application/json',

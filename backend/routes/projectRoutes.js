@@ -1,18 +1,18 @@
 import express from 'express'
 import auth from "../middleware/auth.js"
-import { createMaterial, createManpower, createMachine, getAllMaterials, getAllManpower, getAllMachines, getMaterialById, getManpowerById, getMachineById, updateMaterial, updateManpower, updateMachine, deleteMaterial, deleteManpower, deleteMachine, getProj, updateProject, getProjById, archiveProject, restoreProject } from '../controller/projectController.js'
+import { createMaterial, createManpower, createMachine, getAllMaterials, getAllManpower, getAllMachines, getMaterialById, getManpowerById, getMachineById, updateMaterial, updateManpower, updateMachine, deleteMaterial, deleteManpower, deleteMachine, getProj, updateProject, getProjById, archiveProject, restoreProject, getProjById2 } from '../controller/projectController.js'
 
 const router = express.Router()
 
-router.get('/', getProj)
+router.get('/', auth, getProj)
 
-router.get('/detail/:id', getProjById)
+router.get('/detail/:id', auth, getProjById2)
 
-router.put('/:id', updateProject)
+router.put('/:id', auth, updateProject)
 
-router.put('/archive/:id', archiveProject)
+router.put('/archive/:id', auth, archiveProject)
 
-router.put('/restore/:id', restoreProject)
+router.put('/restore/:id', auth, restoreProject)
 
 // Material Routes
 router.post("/materials", createMaterial);

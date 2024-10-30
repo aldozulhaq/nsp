@@ -74,6 +74,7 @@ interface Material {
     title: string;
     data: any[];
     getItemName: (item: any) => string;
+    getItemRate: (item: any) => number;
     getItemAmount: (item: any) => number;
     getItemCost: (item: any) => number;
   }
@@ -103,7 +104,7 @@ interface Material {
     );
   };
   
-  const CostTable: React.FC<CostTableProps> = ({ title, data = [], getItemName, getItemAmount, getItemCost }) => {
+  const CostTable: React.FC<CostTableProps> = ({ title, data = [], getItemName, getItemRate, getItemAmount, getItemCost }) => {
     if (!data || data.length === 0) {
       return (
         <div className="mt-6">
@@ -121,7 +122,8 @@ interface Material {
             <tr>
               <th className="w-16">No</th>
               <th className="w-1/2">Name</th>
-              <th className="w-1/6 text-right">Amount</th>
+              <th className="w-1/6">Rate</th>
+              <th className="w-1/6 text-right">Quantity</th>
               <th className="w-1/6 text-right">Cost</th>
             </tr>
           </thead>
@@ -130,6 +132,7 @@ interface Material {
               <tr key={index}>
                 <td>{index + 1}</td>
                 <td>{getItemName(item)}</td>
+                <td className="">{getItemRate(item).toLocaleString('id-ID')}</td>
                 <td className="text-right">{getItemAmount(item)}</td>
                 <td className="text-right">{getItemCost(item).toLocaleString('id-ID')}</td>
               </tr>
@@ -218,6 +221,7 @@ interface Material {
         title: 'Material List',
         data: project.costs?.material_list ?? [],
         getItemName: (item: any) => item?.material?.name ?? 'N/A',
+        getItemRate: (item: any) => item?.material?.unit_cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.material?.unit_cost ?? 0) * (item?.amount ?? 0)
       },
@@ -225,6 +229,7 @@ interface Material {
         title: 'Manpower List',
         data: project.costs?.manpower_list ?? [],
         getItemName: (item: any) => item?.manpower?.name ?? 'N/A',
+        getItemRate: (item: any) => item?.manpower?.unit_cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.manpower?.unit_cost ?? 0) * (item?.amount ?? 0)
       },
@@ -232,6 +237,7 @@ interface Material {
         title: 'Machine List',
         data: project.costs?.machine_list ?? [],
         getItemName: (item: any) => item?.machine?.name ?? 'N/A',
+        getItemRate: (item: any) => item?.machine?.unit_cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.machine?.unit_cost ?? 0) * (item?.amount ?? 0)
       },
@@ -239,6 +245,7 @@ interface Material {
         title: 'Misc List',
         data: project.costs?.other_description ?? [],
         getItemName: (item: any) => item?.description ?? 'N/A',
+        getItemRate: (item: any) => item?.cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.cost ?? 0) * (item?.amount ?? 0)
       }
@@ -247,7 +254,7 @@ interface Material {
     const dellProject = async (id: string) => {
       try {
         await archiveProject(id);
-        navigate('/projects');
+        navigate('/');
       } catch (error) {
         console.error('Error archiving project:', error);
       }
@@ -256,7 +263,7 @@ interface Material {
     const resProject = async (id: string) => {
       try {
         await restoreProject(id);
-        navigate('/projects');
+        navigate('/');
       } catch (error) {
         console.error('Error restoring project:', error);
       }

@@ -147,6 +147,103 @@ const getProjById = async (req, res) => {
     }
 };
 
+const getProjById2 = async (req, res) => {
+  try {
+      const projectId = req.params.id;
+
+      const project = await Project.aggregate([
+          { 
+              $match: { 
+                  _id: new mongoose.Types.ObjectId(req.params.id) 
+              } 
+          },
+          {
+              $lookup: {
+                  from: 'costumers',
+                  localField: 'customer_name',
+                  foreignField: '_id',
+                  as: 'customer_details'
+              }
+          },
+          {
+              $project: {
+                  _id: 1,
+                  project_name: 1,
+                  deleted: 1,
+                  no_project: 1,
+                  start_date: 1,
+                  end_date: 1,
+                  nilai: 1,
+                  customer_name: {
+                      $arrayElemAt: ["$customer_details", 0]
+                  },
+                  costs: {
+                      material_cost: "$costs.material_cost",
+                      material_list: {
+                          $map: {
+                              input: "$costs.material_list",
+                              as: "item",
+                              in: {
+                                  material: {
+                                      _id: "$$item.material._id",
+                                      name: "$$item.material.name",
+                                      unit_cost: "$$item.material.unit_cost",
+                                      stock: "$$item.material.stock"
+                                  },
+                                  amount: "$$item.amount"
+                              }
+                          }
+                      },
+                      manpower_cost: "$costs.manpower_cost",
+                      manpower_list: {
+                          $map: {
+                              input: "$costs.manpower_list",
+                              as: "item",
+                              in: {
+                                  manpower: {
+                                      _id: "$$item.manpower._id",
+                                      name: "$$item.manpower.name",
+                                      unit_cost: "$$item.manpower.unit_cost",
+                                      stock: "$$item.manpower.stock"
+                                  },
+                                  amount: "$$item.amount"
+                              }
+                          }
+                      },
+                      machine_cost: "$costs.machine_cost",
+                      machine_list: {
+                          $map: {
+                              input: "$costs.machine_list",
+                              as: "item",
+                              in: {
+                                  machine: {
+                                      _id: "$$item.machine._id",
+                                      name: "$$item.machine.name",
+                                      unit_cost: "$$item.machine.unit_cost",
+                                      stock: "$$item.machine.stock"
+                                  },
+                                  amount: "$$item.amount"
+                              }
+                          }
+                      },
+                      other_cost: "$costs.other_cost",
+                      other_description: "$costs.other_description"
+                  }
+              }
+          }
+      ]);
+
+      if (!project || project.length === 0) {
+          return res.status(404).json({ error: "Project not found" });
+      }
+
+      res.status(200).json({ project: project[0] });
+  } catch (err) {
+      res.status(500).json({ error: err.message });
+  }
+};
+
+
 
 
 const addProj = async (req, res) => {
@@ -379,4 +476,4 @@ export const deleteMaterial = (req, res) => deleteCostDetail(req, res, Material)
 export const deleteManpower = (req, res) => deleteCostDetail(req, res, Manpower);
 export const deleteMachine = (req, res) => deleteCostDetail(req, res, Machine);
 
-export { getProj, addProj, updateProject, getProjById, archiveProject, restoreProject, deleteProject }
+export { getProj, addProj, updateProject, getProjById, archiveProject, restoreProject, deleteProject, getProjById2 }

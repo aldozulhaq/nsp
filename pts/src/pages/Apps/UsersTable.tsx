@@ -37,8 +37,8 @@ const Dashboard = () => {
     });
 
     const roleOptions = [
-        { value: 'user', label: 'User' },
-        { value: 'admin', label: 'Admin'},
+        { value: 'user_pts', label: 'User' },
+        { value: 'admin_pts', label: 'Admin'},
     ];
     
     const [selectedRoleOption, setSelectedRoleOption] = useState<Option | null>(null);
@@ -69,7 +69,8 @@ const Dashboard = () => {
              const filteredUsers = allUsers
              .filter((item:any) => {
                  return item.username.toLowerCase().includes(search.toLowerCase()) &&
-                 !(item.role.toLowerCase().includes('dev'))
+                 (item.role.toLowerCase().includes('user_pts')) ||
+                 (item.role.toLowerCase().includes('admin_pts'))
              })
              setUsers(filteredUsers)
     }
@@ -81,7 +82,7 @@ const Dashboard = () => {
     const cols = [
         {
             accessor: 'username',
-            title: 'SIC username',
+            title: 'username',
             width: 200
         },
         {

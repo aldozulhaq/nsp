@@ -3,12 +3,10 @@ import { Navigate } from 'react-router-dom';
 import Projects from '../pages/Apps/ProjectDash';
 import ProjectDetail from '../pages/Apps/ProjectDetail';
 import ProjectEdit from '../pages/Apps/ProjectEdit';
-const Index = lazy(() => import('../pages/Apps/Dashboard'));
+import ResourceManagement from '../pages/Apps/Resource';
+import Resource from '../pages/Apps/Resource';
 const NotFound = lazy(() => import('../pages/Apps/404'));
-const CustomerTable = lazy(() => import('../pages/Apps/CustomerTable'))
 const UserTable = lazy(() => import('../pages/Apps/UsersTable'))
-const Archives = lazy(() => import('../pages/Apps/Archives'))
-const Handover = lazy(() => import('../pages/Apps/Handover'))
 const Tabs = lazy(() => import('../pages/Components/Tabs'));
 const Accordians = lazy(() => import('../pages/Components/Accordians'));
 const Modals = lazy(() => import('../pages/Components/Modals'));
@@ -79,15 +77,15 @@ const checkUserAuthentication = () => {
 function CheckUserRolePermission(role:string) {
     const uRole = localStorage.getItem("role")
     // if admin or dev or role is same as user role
-    if(uRole == "admin" || uRole == role || uRole == "dev") {
+    if(uRole == "admin_pts" || uRole == "admin" || uRole == role || uRole == "dev") {
         return true
     } else
     return false
 }
 
-function PrivateRouteOTS({ children }:any) {
+function PrivateRoutePTS({ children }:any) {
     const isAuthenticated = checkUserAuthentication();
-    return isAuthenticated && CheckUserRolePermission("user_ots") ? children : <Navigate to="/login" />;
+    return isAuthenticated && CheckUserRolePermission("user_pts") ? children : <Navigate to="/login" />;
 }
 
 function PrivateRoute({ children }:any) {
@@ -97,8 +95,7 @@ function PrivateRoute({ children }:any) {
 
 function AdminRoute({ children }:any) {
     const isAuthenticated = checkUserAuthentication();
-    const isAdmin = localStorage.getItem("role") == "admin"?true:false
-    return isAuthenticated && isAdmin ? children : <Navigate to="/" />;
+    return isAuthenticated && CheckUserRolePermission("") ? children : <Navigate to="/login" />;
 }
 
 function PublicRoute({children}:any) {
@@ -111,39 +108,25 @@ const routes = [
     {
         path: '/',
         element: 
-        <PrivateRouteOTS>
-            <Index />
-        </PrivateRouteOTS>,
-    },
-    {
-        path: '/Projects',
-        element: 
-        <PrivateRouteOTS>
-            <Projects />
-        </PrivateRouteOTS>,
+        <PrivateRoutePTS>
+            <Projects/>
+        </PrivateRoutePTS>,
     },
     {
         path: '/Projects/:id',  // Dynamic route with ID parameter
         element: (
-          <PrivateRouteOTS>
+          <PrivateRoutePTS>
             <ProjectDetail />
-          </PrivateRouteOTS>
+          </PrivateRoutePTS>
         ),
     },
     {
         path: '/Projects/edit/:id',  // Dynamic route with ID parameter
         element: (
-          <PrivateRouteOTS>
+          <PrivateRoutePTS>
             <ProjectEdit />
-          </PrivateRouteOTS>
+          </PrivateRoutePTS>
         ),
-    },
-    {
-        path: '/Customers',
-        element:
-        <PrivateRouteOTS>
-            <CustomerTable />
-        </PrivateRouteOTS>
     },
     {
         path: '/Users',
@@ -152,27 +135,13 @@ const routes = [
             <UserTable />
         </AdminRoute>
     },
-    {
-        path: '/Archives',
-        element:
-        <PrivateRouteOTS>
-            <Archives />
-        </PrivateRouteOTS>
-    },
-    {
-        path: '/Handover',
-        element:
-        <PrivateRouteOTS>
-            <Handover />
-        </PrivateRouteOTS>
-    },
     // Users page
     {
         path: '/users/profile',
         element: 
-        <PrivateRouteOTS>
+        <PrivateRoutePTS>
             <Profile />
-        </PrivateRouteOTS>,
+        </PrivateRoutePTS>,
     },
     //Authentication
     {

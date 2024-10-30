@@ -20,7 +20,6 @@ import store from './store/index';
 
 
 import UserProvider from './contexts/UserContext'
-import OppProvider from './contexts/oppContext'
 import CostumerProvider from './contexts/CustomerContext'
 import UsersProvider from './contexts/UsersContext';
 
@@ -28,7 +27,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
     <React.StrictMode>
         <Suspense>
             <Provider store={store}>
-                <OppProvider>
                     <CostumerProvider>    
                         <UserProvider>
                             <UsersProvider>
@@ -36,7 +34,6 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
                             </UsersProvider>
                         </UserProvider>
                     </CostumerProvider>
-                </OppProvider>
             </Provider>
         </Suspense>
     </React.StrictMode>

@@ -69,7 +69,7 @@ const Sidebar = () => {
 
     const checkIfAdmin = () => {
         const role = localStorage.getItem('role')
-        if(role?.toLowerCase() !== 'user') {
+        if(role?.toLowerCase() !== 'user_pts') {
             return (<li className="menu nav-item">
             <NavLink to="/Users" className="group">
                 <div className="flex items-center">
@@ -110,12 +110,12 @@ const Sidebar = () => {
                                     <div className="flex items-center">
                                         <IconMenuDashboard
                                          className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Opportunity')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Project')}</span>
                                     </div>
                                 </NavLink>
                             </li>
 
-                            <li className="menu nav-item">
+                            {/* <li className="menu nav-item">
                                 <NavLink to="/Customers" className="group">
                                     <div className="flex items-center">
                                         <IconMenuTables
@@ -123,11 +123,11 @@ const Sidebar = () => {
                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Customers')}</span>
                                     </div>
                                 </NavLink>
-                            </li>
+                            </li> */}
 
                             {checkIfAdmin()}
 
-                            <li className="menu nav-item">
+                            {/* <li className="menu nav-item">
                                 <NavLink to="/Archives" className="group">
                                     <div className="flex items-center">
                                         <IconMenuDatatables
@@ -135,9 +135,9 @@ const Sidebar = () => {
                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Archives')}</span>
                                     </div>
                                 </NavLink>
-                            </li>
+                            </li> */}
                             
-                            <li className="menu nav-item">
+                            {/* <li className="menu nav-item">
                                 <NavLink to="/Handover" className="group">
                                     <div className="flex items-center">
                                         <IconMenuDocumentation
@@ -145,7 +145,7 @@ const Sidebar = () => {
                                         <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Handover')}</span>
                                     </div>
                                 </NavLink>
-                            </li>
+                            </li> */}
                         </ul>
                     </PerfectScrollbar>
                 </div>

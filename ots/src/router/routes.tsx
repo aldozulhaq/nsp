@@ -76,7 +76,7 @@ const checkUserAuthentication = () => {
 function CheckUserRolePermission(role:string) {
     const uRole = localStorage.getItem("role")
     // if admin or dev or role is same as user role
-    if(uRole == "admin_ots" || uRole == role || uRole == "dev") {
+    if(uRole == "admin_ots" || uRole == "admin" || uRole == role || uRole == "dev") {
         return true
     } else
     return false

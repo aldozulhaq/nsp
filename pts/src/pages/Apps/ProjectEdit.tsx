@@ -15,21 +15,33 @@ interface ItemOption {
 }
 
 interface MaterialItem {
-  material: string;
+  material: {
+    _id: string;
+    name: string;
+    unit_cost: number;
+    stock: number;
+  };
   amount: number;
-  unit_cost: number;
 }
 
 interface ManpowerItem {
-  manpower: string;
+  manpower: {
+    _id: string;
+    name: string;
+    unit_cost: number;
+    stock: number;
+  };
   amount: number;
-  unit_cost: number;
 }
 
 interface MachineItem {
-  machine: string;
+  machine: {
+    _id: string;
+    name: string;
+    unit_cost: number;
+    stock: number;
+  };
   amount: number;
-  unit_cost: number;
 }
 
 interface OtherItem {
@@ -39,12 +51,12 @@ interface OtherItem {
 }
 
 interface ProjectCosts {
-  material_list: MaterialItem[];
-  manpower_list: ManpowerItem[];
-  machine_list: MachineItem[];
   material_cost: number;
+  material_list: MaterialItem[];
   manpower_cost: number;
+  manpower_list: ManpowerItem[];
   machine_cost: number;
+  machine_list: MachineItem[];
   other_cost: number;
   other_description: OtherItem[];
 }
@@ -68,16 +80,7 @@ interface FormData {
   no_project: string;
   start_date: string;
   end_date: string;
-  costs: {
-    material_list: MaterialItem[];
-    manpower_list: ManpowerItem[];
-    machine_list: MachineItem[];
-    material_cost: number;
-    manpower_cost: number;
-    machine_cost: number;
-    other_cost: number;
-    other_description: OtherItem[];
-  };
+  costs: ProjectCosts;
 }
 
 interface CostRatioIndicatorProps {
@@ -86,13 +89,12 @@ interface CostRatioIndicatorProps {
 }
 
 interface CostTableProps {
-    title: string;
-    items: any[];
-    onItemsChange: (items: any[]) => void;
-    itemType: string;
-    calculateCosts: any;
-    itemOptions?: ItemOption[];
-    readOnlyTotal?: boolean;
+  title: string;
+  items: any[];
+  onItemsChange: (items: any[]) => void;
+  itemType: string;
+  calculateCosts: () => void;
+  readOnlyTotal?: boolean;
 }
 
 const CostRatioIndicator: React.FC<CostRatioIndicatorProps> = ({ nilai, totalCost }) => {
@@ -123,43 +125,46 @@ const CostRatioIndicator: React.FC<CostRatioIndicatorProps> = ({ nilai, totalCos
   );
 };
 
-const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, itemType, itemOptions, readOnlyTotal = false }) => {
-    const addItem = () => {
-      const newItem: any = {
-        amount: 0,
-      };
+const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, itemType, calculateCosts, readOnlyTotal = false }) => {
+  const addItem = () => {
+    const newItem: any = {
+      [itemType]: {
+        name: "",
+        unit_cost: 0,
+      },
+      amount: 0,
+    };
   
-      if (itemType === 'description') {
-        newItem.description = '';
-        newItem.cost = 0;
-      } else {
-        newItem[itemType] = '';
-      }
+    if (!items) {
+      onItemsChange([newItem]);
+    } else {
+      onItemsChange([...items, newItem]);
+    }
+  };
 
-      if (!items) {
-        onItemsChange([newItem]);
-      } else {
-        onItemsChange([...items, newItem]);
-      }
-    };
-  
-    const updateItem = (index: number, field: string, value: any) => {
-      const newItems = [...items];
-      if (itemType === 'description') {
-        newItems[index][field] = value;
-      } else {
-        if (field === 'id') {
-          newItems[index][itemType] = value;
-        } else {
-          newItems[index][field] = value;
-        }
-      }
-      onItemsChange(newItems);
-    };
-  
-    const removeItem = (index: number) => {
-      onItemsChange(items.filter((_, i) => i !== index));
-    };
+  const updateItem = (index: number, field: string, value: any) => {
+    const newItems = [...items];
+    if (field === 'name' || field === 'unit_cost') {
+      newItems[index][itemType][field] = value;
+    } else {
+      newItems[index][field] = value;
+    }
+    onItemsChange(newItems);
+    calculateCosts();
+  };
+
+  const removeItem = (index: number) => {
+    onItemsChange(items.filter((_, i) => i !== index));
+    calculateCosts();
+  };
+
+  const getTotalCost = (): number => {
+    if (itemType === 'description') {
+      return items.reduce((total, item) => total + (item.cost * item.amount), 0);
+    } else {
+      return items.reduce((total, item) => total + (item[itemType].unit_cost * item.amount), 0);
+    }
+  };
   
     return (
       <div className="mt-6">
@@ -174,8 +179,8 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                 <th className="w-128">
                   {itemType === 'description' ? 'Description' : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ID`}
                 </th>
-                <th className="w-40">Cost</th>
-                <th className="w-32">Amount</th>
+                <th className="w-40">Rate</th>
+                <th className="w-32">Quantity</th>
                 <th className="w-32">Total</th>
                 <th className="w-16"></th>
               </tr>
@@ -185,33 +190,21 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                 <tr key={index}>
                   <td>{index + 1}</td>
                   <td>
-                    {itemType === 'description'?
-                    (<input
+                    <input
                       type="text"
                       className="form-input"
-                      value={itemType === 'description' ? item.description : item[itemType]._id}
-                      onChange={(e) => updateItem(index, itemType === 'description' ? 'description' : itemType, e.target.value)}
-                    />)
-                    :
-                    (
-                    <Select
-                    placeholder={"Insert " + itemType}
-                    options={itemOptions}
-                    value={itemOptions?.find(option => option.value === item[itemType]?._id) || null}
-                    onChange={(option) => updateItem(index, itemType, option?.fullData || {})}
-                    menuPortalTarget={document.body}
-                    styles={{ menuPortal: base => ({ ...base, zIndex: 9999 }) }}
-                    isClearable
-                    />)
-                    }
+                      value={itemType === 'description' ? item.description : item[itemType].name}
+                      onChange={(e) => updateItem(index, itemType === 'description' ? 'description' : 'name', e.target.value)}
+                      required
+                    />
                   </td>
                   <td>
                     <input
                       type="number"
-                      className={itemType === 'description' ? "form-input": "form-input bg-gray-100"}
+                      className="form-input"
                       value={itemType === 'description' ? item.cost : item[itemType].unit_cost}
-                      onChange={(e) => updateItem(index, 'cost', Number(itemType === 'description' ? e.target.value : item[itemType].unit_cost))}
-                      disabled={itemType !== 'description'}
+                      onChange={(e) => updateItem(index, itemType === 'description' ? 'cost' : 'unit_cost', Number(e.target.value))}
+                      required
                     />
                   </td>
                   <td>
@@ -220,6 +213,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                       className="form-input"
                       value={item.amount ?? 0}
                       onChange={(e) => updateItem(index, 'amount', Number(e.target.value))}
+                      required
                     />
                   </td>
                   <td className="text-right">
@@ -237,6 +231,15 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                 </tr>
               ))}
             </tbody>
+            <tfoot>
+              <tr className="bg-gray-50 font-semibold">
+                <td colSpan={4} className="text-right p-2">Total {title}</td>
+                <td className="text-right p-2">
+                  {getTotalCost().toLocaleString('id-ID')}
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
           </table>
           <div className="flex justify-end mt-2">
             <button 
@@ -264,86 +267,21 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
       start_date: '',
       end_date: '',
       costs: {
-        material_list: [],
-        manpower_list: [],
-        machine_list: [],
         material_cost: 0,
+        material_list: [],
         manpower_cost: 0,
+        manpower_list: [],
         machine_cost: 0,
+        machine_list: [],
         other_cost: 0,
-        other_description: []
-      }
+        other_description: [],
+      },
     });
-
-    const [materialOptions, setMaterialOptions] = useState<ItemOption[]>([]);
-    const [manpowerOptions, setManpowerOptions] = useState<ItemOption[]>([]);
-    const [machineOptions, setMachineOptions] = useState<ItemOption[]>([]);
   
     useEffect(() => {
       dispatch(setPageTitle('Project Edit'));
       fetchProject();
-      fetchOptions();
     }, []);
-
-    const fetchOptions = async () => {
-      try {
-        const allMaterials = await fetch('/api/project/materials').then(res => res.json());
-        const allManpower = await fetch('/api/project/manpower').then(res => res.json());
-        const allMachines = await fetch('/api/project/machines').then(res => res.json());
-
-        const materials = allMaterials.map((material:any) => ({
-          value: material._id,
-          label: material.name,
-          fullData: material
-        }))
-
-        const manpower = allManpower.map((manpower:any) => ({
-          value: manpower._id,
-          label: manpower.name,
-          fullData: manpower
-        }))
-
-        const machines = allMachines.map((machine:any) => ({
-          value: machine._id,
-          label: machine.name,
-          fullData: machine
-        }))
-        
-        setMaterialOptions(materials);
-        setManpowerOptions(manpower);
-        setMachineOptions(machines);
-      } catch (error) {
-        console.error('Error fetching options:', error);
-      }
-    };
-  
-    // Calculate costs whenever lists change
-    useEffect(() => {
-      calculateCosts();
-    }, [
-      formData.costs.material_list,
-      formData.costs.manpower_list,
-      formData.costs.machine_list,
-      formData.costs.other_description
-    ]);
-  
-    const calculateCosts = () => {
-      const materialCost = formData.costs.material_list?.reduce((total, item) => total + (item.amount * (item.material.unit_cost || 0)), 0) ?? 0;
-      const manpowerCost = formData.costs.manpower_list?.reduce((total, item) => total + (item.amount * (item.manpower.unit_cost || 0)), 0) ?? 0;
-      const machineCost = formData.costs.machine_list?.reduce((total, item) => total + (item.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
-      const otherCost = formData.costs.other_description?.reduce((total, item) => total + (item.cost * item.amount), 0) ?? 0;
-    
-      setFormData(prev => ({
-        ...prev,
-        costs: {
-          ...prev.costs,
-          material_cost: materialCost,
-          manpower_cost: manpowerCost,
-          machine_cost: machineCost,
-          other_cost: otherCost
-        }
-      }));
-    };
   
     const fetchProject = async () => {
       try {
@@ -354,21 +292,39 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
           start_date: response.project.start_date?.split('T')[0] || '',
           end_date: response.project.end_date?.split('T')[0] || '',
           costs: response.project.costs || {
-            material_list: [],
-            manpower_list: [],
-            machine_list: [],
             material_cost: 0,
+            material_list: [],
             manpower_cost: 0,
+            manpower_list: [],
             machine_cost: 0,
+            machine_list: [],
             other_cost: 0,
-            other_description: []
-          }
+            other_description: [],
+          },
         });
         setIsLoading(false);
       } catch (error) {
         console.error('Error fetching project:', error);
         setIsLoading(false);
       }
+    };
+  
+    const calculateCosts = () => {
+      const materialCost = formData.costs.material_list?.reduce((total, item) => total + (item.amount * (item.material.unit_cost || 0)), 0) ?? 0;
+      const manpowerCost = formData.costs.manpower_list?.reduce((total, item) => total + (item.amount * (item.manpower.unit_cost || 0)), 0) ?? 0;
+      const machineCost = formData.costs.machine_list?.reduce((total, item) => total + (item.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
+      const otherCost = formData.costs.other_description?.reduce((total, item) => total + (item.cost * item.amount), 0) ?? 0;
+  
+      setFormData((prev) => ({
+        ...prev,
+        costs: {
+          ...prev.costs,
+          material_cost: materialCost,
+          manpower_cost: manpowerCost,
+          machine_cost: machineCost,
+          other_cost: otherCost,
+        },
+      }));
     };
   
     const calculateTotalCost = (): number => {
@@ -383,20 +339,19 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       const totalCost = calculateTotalCost();
-      
+  
       if (totalCost > (project?.nilai || 0)) {
         alert('Total cost cannot exceed project nilai!');
         return;
       }
-            
+  
+      console.log(formData)
       try {
         await updateProject(id as string, formData);
         navigate(`/projects/${id}`);
-      }
-      catch (error) {
+      } catch (error) {
         console.error('Error updating project:', error);
       }
-
     };
   
     if (isLoading) return <div>Loading...</div>;
@@ -487,7 +442,6 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
               }
               itemType="material"
               calculateCosts={calculateCosts}
-              itemOptions={materialOptions}
             />
   
             <CostTable
@@ -504,7 +458,6 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
               }
               itemType="manpower"
               calculateCosts={calculateCosts}
-              itemOptions={manpowerOptions}
             />
   
             <CostTable
@@ -521,7 +474,6 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
               }
               itemType="machine"
               calculateCosts={calculateCosts}
-              itemOptions={machineOptions}
             />
   
             <CostTable
