@@ -69,8 +69,8 @@ const LoginBoxed = () => {
                         <div className="container lg:w-[0px] sm:w-[150px] min-[320px]:w-[150px] mb-5">
                             <img src="/assets/images/icon-hd.png" alt="image" />
                         </div>
-                        <h1 className="text-3xl font-extrabold uppercase !leading-snug text-dark text-center md:text-4xl">Sales & Proposal</h1>
-                        <h1 className="text-3xl font-extrabold uppercase !leading-snug text-dark text-center md:text-4xl mb-7">Opportunity Tracking System</h1>
+                        <h1 className="text-3xl font-extrabold uppercase !leading-snug text-dark text-center md:text-4xl">Project</h1>
+                        <h1 className="text-3xl font-extrabold uppercase !leading-snug text-dark text-center md:text-4xl mb-7">Tracking System</h1>
                         <div className="mx-auto w-full max-w-[440px]">
                             <div className="mb-10">
                                 <h1 className="text-3xl font-extrabold uppercase !leading-snug text-primary md:text-4xl">Sign in</h1>
