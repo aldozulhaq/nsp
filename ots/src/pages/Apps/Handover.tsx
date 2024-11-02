@@ -451,7 +451,8 @@ const Handover = () => {
                                 highlightOnHover
                                 striped
                                 withColumnBorders
-                                height={500}   
+                                height={500}
+                                pinLastColumn   
                             />
                     </div>
                 </div>
@@ -479,7 +480,8 @@ const Handover = () => {
                                 highlightOnHover
                                 striped
                                 withColumnBorders
-                                height={500}   
+                                height={500}
+                                pinLastColumn   
                             />
                     </div>
                 </div>
