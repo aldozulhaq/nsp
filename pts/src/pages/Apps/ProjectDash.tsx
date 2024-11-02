@@ -85,7 +85,7 @@ const Projects = () => {
             noWrap: true,
             render: (data:any) => (
                 <div className={`flex items-center ${data.deleted ? 'text-gray-500' : ''}`}>
-                    <span>{data.project_name}</span>
+                    <span>{data.no_project}</span>
                     {data.deleted && (
                         <span className="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">Archived</span>
                     )}

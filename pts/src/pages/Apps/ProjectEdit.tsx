@@ -159,10 +159,20 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
   };
 
   const getTotalCost = (): number => {
+    if (!items || items.length === 0) return 0;
+    
     if (itemType === 'description') {
-      return items.reduce((total, item) => total + (item.cost * item.amount), 0);
+      return items.reduce((total, item) => {
+        const cost = Number(item?.cost) || 0;
+        const amount = Number(item?.amount) || 0;
+        return total + (cost * amount);
+      }, 0);
     } else {
-      return items.reduce((total, item) => total + (item[itemType].unit_cost * item.amount), 0);
+      return items.reduce((total, item) => {
+        const unitCost = Number(item?.[itemType]?.unit_cost) || 0;
+        const amount = Number(item?.amount) || 0;
+        return total + (unitCost * amount);
+      }, 0);
     }
   };
   
@@ -310,10 +320,10 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
     };
   
     const calculateCosts = () => {
-      const materialCost = formData.costs.material_list?.reduce((total, item) => total + (item.amount * (item.material.unit_cost || 0)), 0) ?? 0;
-      const manpowerCost = formData.costs.manpower_list?.reduce((total, item) => total + (item.amount * (item.manpower.unit_cost || 0)), 0) ?? 0;
-      const machineCost = formData.costs.machine_list?.reduce((total, item) => total + (item.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
-      const otherCost = formData.costs.other_description?.reduce((total, item) => total + (item.cost * item.amount), 0) ?? 0;
+      const materialCost = formData.costs.material_list?.reduce((total, item) => total + (item?.amount * (item.material.unit_cost || 0)), 0) ?? 0;
+      const manpowerCost = formData.costs.manpower_list?.reduce((total, item) => total + (item?.amount * (item.manpower.unit_cost || 0)), 0) ?? 0;
+      const machineCost = formData.costs.machine_list?.reduce((total, item) => total + (item?.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
+      const otherCost = formData.costs.other_description?.reduce((total, item) => total + (item?.cost * item.amount), 0) ?? 0;
   
       setFormData((prev) => ({
         ...prev,
