@@ -140,6 +140,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
     } else {
       onItemsChange([...items, newItem]);
     }
+    calculateCosts();
   };
 
   const updateItem = (index: number, field: string, value: any) => {
@@ -187,7 +188,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
               <tr>
                 <th className="w-16">No</th>
                 <th className="w-128">
-                  {itemType === 'description' ? 'Description' : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} ID`}
+                  {itemType === 'description' ? 'Description' : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`}
                 </th>
                 <th className="w-40">Rate</th>
                 <th className="w-32">Quantity</th>
@@ -272,6 +273,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
     const { id } = useParams<{ id: string }>();
     const [project, setProject] = useState<Project | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [totalCost, setTotalCost] = useState<number>(0);
     const [formData, setFormData] = useState<FormData>({
       no_project: '',
       start_date: '',
@@ -318,6 +320,25 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
         setIsLoading(false);
       }
     };
+
+    useEffect(() => {
+      calculateCosts();
+    }, [
+      formData.costs.material_list,
+      formData.costs.manpower_list,
+      formData.costs.machine_list,
+      formData.costs.other_description
+    ]);
+
+    useEffect(() => {
+      const total = calculateTotalCost();
+      setTotalCost(total);
+    }, [
+      formData.costs.material_cost,
+      formData.costs.manpower_cost,
+      formData.costs.machine_cost,
+      formData.costs.other_cost
+    ]);
   
     const calculateCosts = () => {
       const materialCost = formData.costs.material_list?.reduce((total, item) => total + (item?.amount * (item.material.unit_cost || 0)), 0) ?? 0;
@@ -427,12 +448,12 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                   <div>
                     <label className="block mb-2">Total Cost</label>
                     <div className="form-input bg-gray-100">
-                      {calculateTotalCost().toLocaleString('id-ID')}
+                      {totalCost.toLocaleString('id-ID')}
                     </div>
                   </div>
                   <CostRatioIndicator 
                     nilai={project?.nilai || 0} 
-                    totalCost={calculateTotalCost()} 
+                    totalCost={totalCost} 
                   />
                 </div>
               </div>
