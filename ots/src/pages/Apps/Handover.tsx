@@ -197,7 +197,13 @@ const Handover = () => {
         },
         {
             accessor: 'nilai',
-            title: "Nilai"
+            title: "Nilai",
+            render: (data:any) => (<span>{data.nilai?.toLocaleString('id-ID')}</span>)
+        },
+        {
+            accessor: 'gm',
+            title: "Gross Margin",
+            render: (data:any) => (<span>{data.gm}%</span>)
         },
         {
             accessor: 'actions',
@@ -249,7 +255,13 @@ const Handover = () => {
         },
         {
             accessor: 'nilai',
-            title: "Nilai"
+            title: "Nilai",
+            render: (data:any) => (<span>{data.nilai.toLocaleString('id-ID')}</span>)
+        },
+        {
+            accessor: 'gm',
+            title: "Gross Margin",
+            render: (data:any) => (<span>{data.gm}%</span>)
         },
         {
             accessor: 'actions',

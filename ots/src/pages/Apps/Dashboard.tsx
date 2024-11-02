@@ -1015,15 +1015,15 @@ const Dashboard = () => {
                                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                                 <div className="mb-5">
                                                     <label>Customer Name</label>
-                                                    <Select id='customer_name' placeholder="Customer" options={customerOptions} value={selectedCustomerOption} onChange={handleCustomerChange}/>
+                                                    <Select id='customer_name' placeholder="Customer" options={customerOptions} value={selectedCustomerOption} onChange={handleCustomerChange} isDisabled={params.handover_status != 'Finished'? false : true}/>
                                                 </div>
                                                 <div className="mb-5">
                                                     <label>SIC</label>
-                                                    <Select placeholder="SIC" options={sicOptions} value={selectedSicOption} onChange={handleSicChange} isDisabled={params._id ? false : true}/>
+                                                    <Select placeholder="SIC" options={sicOptions} value={selectedSicOption} onChange={handleSicChange} isDisabled={params.handover_status != 'Finished'? false : true}/>
                                                 </div>
                                                 <div className="mb-5">
                                                     <label>Opportunity Status</label>
-                                                    <Select placeholder="Status" options={oppStatusOptions} value={selectedStatusOption} onChange={handleStatusChange}/>
+                                                    <Select placeholder="Status" options={oppStatusOptions} value={selectedStatusOption} onChange={handleStatusChange} isDisabled={params.handover_status != 'Finished'? false : true}/>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1031,11 +1031,13 @@ const Dashboard = () => {
                                                     <label className='mb-3.5'>Firm/Budgetary</label>
                                                     <input id='firm_budgetary' type="radio" name="FiBu" className="form-radio" value="Firm"
                                                     onChange={(e) => changeValue(e)}
-                                                    defaultChecked={params._id?params.firm_budgetary === 'Firm':false}/>
+                                                    defaultChecked={params._id?params.firm_budgetary === 'Firm':false}
+                                                    disabled={params.handover_status != 'Finished'? false : true}/>
                                                     <span className='pr-5'>Firm</span>
                                                     <input id='firm_budgetary' type="radio" name="FiBu" className="form-radio" value="Budgetary"
                                                     onChange={(e) => changeValue(e)}
-                                                    defaultChecked={params._id?params.firm_budgetary === 'Budgetary':false}/>
+                                                    defaultChecked={params._id?params.firm_budgetary === 'Budgetary':false}
+                                                    disabled={params.handover_status != 'Finished'? false : true}/>
                                                     <span>Budgetary</span>
                                                 </div>
                                                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
@@ -1044,6 +1046,7 @@ const Dashboard = () => {
                                                         <Flatpickr
                                                         value={date1}
                                                         id='closing_date'
+                                                        disabled={params.handover_status != 'Finished'? false : true}
                                                         options={{ dateFormat: 'd-m-Y', position: isRtl ? 'auto right' : 'auto left' }}
                                                         className="form-input"
                                                         onChange={(date) => handleDateChange(date)} />
@@ -1053,6 +1056,7 @@ const Dashboard = () => {
                                                         <Flatpickr
                                                         value={date2}
                                                         id='ntp'
+                                                        disabled={params.handover_status != 'Finished'? false : true}
                                                         options={{ dateFormat: 'd-m-Y', position: isRtl ? 'auto right' : 'auto left' }}
                                                         className="form-input"
                                                         onChange={(date) => handleNTPChange(date)} />
@@ -1076,7 +1080,7 @@ const Dashboard = () => {
                                                     <div className="mb-5">
                                                         <label>Probability</label>
                                                         <div className='flex'>
-                                                        <input id='probability' type="number" inputMode='numeric' placeholder="Enter Probability" className="form-input" defaultValue={params._id?params.probability:""} onChange={(e) => changeValue(e)}/>
+                                                        <input id='probability' type="number" inputMode='numeric' placeholder="Enter Probability" className="form-input" disabled={params.handover_status != 'Finished'? false : true} defaultValue={params._id?params.probability:""} onChange={(e) => changeValue(e)}/>
                                                             <div className="bg-[#eee] flex justify-center items-center ltr:rounded-r-md rtl:rounded-l-md px-3 font-semibold border ltr:border-l-0 rtl:border-r-0 border-white-light dark:border-[#17263c] dark:bg-[#1b2e4b]">
                                                                 %
                                                             </div>
