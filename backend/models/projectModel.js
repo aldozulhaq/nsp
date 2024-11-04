@@ -167,7 +167,11 @@ const ProjectSchema = new mongoose.Schema({
         required: true
     },
     costs: CostSchema,
-    keterangan: {
+    desc: {
+        type: String,
+        required: false
+    },
+    project_status: {
         type: String,
         required: false
     },

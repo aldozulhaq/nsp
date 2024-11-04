@@ -14,6 +14,11 @@ interface ItemOption {
   fullData: any;
 }
 
+interface GrossMarginIndicatorProps {
+  nilai: number;
+  totalCost: number;
+}
+
 interface MaterialItem {
   material: {
     _id: string;
@@ -74,6 +79,8 @@ interface Project {
   costs?: ProjectCosts;
   customer_name: CustomerDetails;
   project_name: string;
+  project_status: string;
+  desc: string;
 }
 
 interface FormData {
@@ -81,6 +88,8 @@ interface FormData {
   start_date: string;
   end_date: string;
   costs: ProjectCosts;
+  project_status: string;
+  desc: string;
 }
 
 interface CostRatioIndicatorProps {
@@ -121,6 +130,57 @@ const CostRatioIndicator: React.FC<CostRatioIndicatorProps> = ({ nilai, totalCos
           style={{ width: `${Math.min(ratio, 100)}%` }}
         ></div>
       </div>
+    </div>
+  );
+};
+
+const GrossMarginIndicator: React.FC<GrossMarginIndicatorProps> = ({ nilai, totalCost }) => {
+  const grossMargin = nilai - totalCost;
+  const grossMarginPercentage = nilai ? (grossMargin / nilai) * 100 : 0;
+  
+  const getColorClass = (percentage: number): string => {
+    if (percentage <= 10) return 'bg-red-500';
+    if (percentage <= 20) return 'bg-orange-500';
+    if (percentage <= 30) return 'bg-yellow-500';
+    return 'bg-green-500';
+  };
+
+  return (
+    <div className="mb-4 space-y-4">
+      {/* Gross Margin in Rupiah */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-xs text-gray-500">
+          <span>Gross Margin (Rp)</span>
+          <span>{grossMargin.toLocaleString('id-ID')}</span>
+        </div>
+        <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className={`h-full transition-all duration-500 rounded-full ${getColorClass(grossMarginPercentage)}`} 
+            style={{ width: `${Math.max(0, Math.min(grossMargin / nilai * 100, 100))}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Gross Margin Percentage */}
+      <div className="space-y-2">
+        <div className="flex justify-between text-xs text-gray-500">
+          <span>Gross Margin (%)</span>
+          <span>{(grossMarginPercentage).toFixed(1)}%</span>
+        </div>
+        <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+          <div 
+            className={`h-full transition-all duration-500 rounded-full ${getColorClass(grossMarginPercentage)}`} 
+            style={{ width: `${Math.max(0, Math.min(grossMarginPercentage, 100))}%` }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Warning Message */}
+      {grossMargin < 0 && (
+        <div className="text-xs text-red-500 font-medium">
+          Warning: Project is operating at a loss!
+        </div>
+      )}
     </div>
   );
 };
@@ -288,6 +348,8 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
         other_cost: 0,
         other_description: [],
       },
+      project_status: '',
+      desc: '',
     });
   
     useEffect(() => {
@@ -313,6 +375,8 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
             other_cost: 0,
             other_description: [],
           },
+          project_status: response.project.project_status || '',
+          desc: response.project.desc || '',
         });
         setIsLoading(false);
       } catch (error) {
@@ -370,12 +434,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
     const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       const totalCost = calculateTotalCost();
-  
-      if (totalCost > (project?.nilai || 0)) {
-        alert('Total cost cannot exceed project nilai!');
-        return;
-      }
-  
+    
       console.log(formData)
       try {
         await updateProject(id as string, formData);
@@ -396,6 +455,14 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                 Project Edit - {project?.project_name} - {project?.customer_name.name}
               </div>
               <div className="flex gap-2">
+                <button 
+                  type="button" 
+                  onClick={() => navigate(`/projects/${id}`)} 
+                  className="btn btn-outline-danger"
+                >
+                  <IconX className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
+                  Cancel
+                </button>
                 <button type="submit" className="btn btn-primary">
                   <IconSave className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
                   Save
@@ -435,6 +502,38 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                       onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                     />
                   </div>
+                  <div>
+                  <label className="block mb-2">Project Status</label>
+                  <Select
+                    value={{
+                      value: formData.project_status,
+                      label: formData.project_status.charAt(0).toUpperCase() + formData.project_status.slice(1),
+                    }}
+                    onChange={(option: SingleValue<{ value: string; label: string }>) => {
+                      setFormData({
+                        ...formData,
+                        project_status: option?.value || '',
+                      });
+                    }}
+                    options={[
+                      { value: 'preparation', label: 'Preparation' },
+                      { value: 'ongoing', label: 'Ongoing' },
+                      { value: 'bastp', label: 'BASTP' },
+                      { value: 'invoice', label: 'Invoice' },
+                      { value: 'closing', label: 'Closing' },
+                    ]}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-2">Project Description</label>
+                  <textarea
+                    className="form-input"
+                    value={formData.desc}
+                    onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
+                    rows={3}
+                  ></textarea>
+                </div>
                 </div>
               </div>
               <div className="lg:w-1/3">
@@ -449,6 +548,18 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                     <label className="block mb-2">Total Cost</label>
                     <div className="form-input bg-gray-100">
                       {totalCost.toLocaleString('id-ID')}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block mb-2">Gross Margin (Rp)</label>
+                    <div className="form-input bg-gray-100">
+                      {project?.nilai ? (project.nilai - totalCost).toLocaleString('id-ID') : 0}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block mb-2">Gross Margin (%)</label>
+                    <div className="form-input bg-gray-100">
+                      {project?.nilai ? ((project?.nilai - totalCost)/project?.nilai * 100).toFixed(1) : 0}
                     </div>
                   </div>
                   <CostRatioIndicator 

@@ -10,11 +10,19 @@ import IconPlus from '../../components/Icon/IconPlus';
 import { archiveProject, getProjectDetail, restoreProject } from '../../controllers/projectsController';
 import IconTrash from '../../components/Icon/IconTrash';
 import Swal from 'sweetalert2';
+import IconX from '../../components/Icon/IconX';
+import ProjectDescriptionModal from '../Components/project-detail-description-modal';
 
 interface Material {
     name: string;
   }
   
+
+  interface GrossMarginIndicatorProps {
+    nilai: number;
+    totalCost: number;
+  }
+
   interface Manpower {
     name: string;
   }
@@ -61,7 +69,10 @@ interface Material {
     customer_name: CustomerDetails,
     project_name: string,
     nilai: number
+    gm: number
     deleted: boolean
+    desc: string
+    project_status: string
   }
   
   interface TableItem {
@@ -168,6 +179,57 @@ interface Material {
             <div className="w-[37%]">{totalCost.toLocaleString('id-ID')}</div>
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const GrossMarginIndicator: React.FC<GrossMarginIndicatorProps> = ({ nilai, totalCost }) => {
+    const grossMargin = nilai - totalCost;
+    const grossMarginPercentage = nilai ? (grossMargin / nilai) * 100 : 0;
+    
+    const getColorClass = (percentage: number): string => {
+      if (percentage <= 10) return 'bg-red-500';
+      if (percentage <= 20) return 'bg-orange-500';
+      if (percentage <= 30) return 'bg-yellow-500';
+      return 'bg-green-500';
+    };
+  
+    return (
+      <div className="mb-4 space-y-4">
+        {/* Gross Margin in Rupiah */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Gross Margin (Rp)</span>
+            <span>{grossMargin.toLocaleString('id-ID')}</span>
+          </div>
+          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-500 rounded-full ${getColorClass(grossMarginPercentage)}`} 
+              style={{ width: `${Math.max(0, Math.min(grossMargin / nilai * 100, 100))}%` }}
+            ></div>
+          </div>
+        </div>
+  
+        {/* Gross Margin Percentage */}
+        <div className="space-y-2">
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Gross Margin (%)</span>
+            <span>{(grossMarginPercentage).toFixed(1)}%</span>
+          </div>
+          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div 
+              className={`h-full transition-all duration-500 rounded-full ${getColorClass(grossMarginPercentage)}`} 
+              style={{ width: `${Math.max(0, Math.min(grossMarginPercentage, 100))}%` }}
+            ></div>
+          </div>
+        </div>
+  
+        {/* Warning Message */}
+        {grossMargin < 0 && (
+          <div className="text-xs text-red-500 font-medium">
+            Warning: Project is operating at a loss!
+          </div>
+        )}
       </div>
     );
   };
@@ -344,10 +406,40 @@ interface Material {
           });
       };
  }
+ const getProjectStatusColor = (status: string) => {
+  switch (status) {
+    case 'preparation':
+      return 'bg-blue-500';
+    case 'ongoing':
+      return 'bg-green-500';
+    case 'BASTP':
+      return 'bg-yellow-500';
+    case 'Invoice':
+      return 'bg-orange-500';
+    case 'Closing':
+      return 'bg-red-500';
+    default:
+      return 'bg-gray-500';
+  }
+};
+
+const formatDescription = (desc: string) => {
+  if (!desc) return 'N/A';
+  return desc.length > 20 ? `${desc.slice(0, 20)}...` : desc;
+};
   
     return (
       <div>
         <div className="flex items-center lg:justify-end justify-center flex-wrap gap-4 mb-6">
+          <button 
+            type="button" 
+            onClick={() => navigate(`/`)} 
+            className="btn btn-outline-danger"
+          >
+            <IconX className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
+            Back
+          </button>
+
           {!project.deleted && (
           <>
           <NavLink to={`/projects/edit/${project._id}`} className="btn btn-warning gap-2">
@@ -384,6 +476,10 @@ interface Material {
                 <div>Project Name:</div>
                 <div className="text-black dark:text-white font-semibold">{project.project_name ?? 'N/A'}</div>
               </div>
+              <div className="space-y-1 text-white-dark">
+                <div>Project Status:</div>
+                <div className={`text-black dark:text-white font-semibold`}> <span className={`badge ${getProjectStatusColor(project.project_status)}`}> {project.project_status ?? 'N/A'} </span> </div>
+              </div>
             </div>
             <div className="flex justify-between sm:flex-row flex-col gap-6 lg:w-2/3">
               <div className="xl:1/3 lg:w-2/5 sm:w-1/2">
@@ -399,6 +495,11 @@ interface Material {
                   <div className="text-white-dark">End Date :</div>
                   <div>{formatDate(project.end_date)}</div>
                 </div>
+                <div className="flex items-center w-full justify-between mb-2">
+                  <div className="text-white-dark">Desc :</div>
+                  <div>{formatDescription(project.desc)}</div>
+                </div>
+                {project.desc?<ProjectDescriptionModal description={project.desc} />:''}
               </div>
               <div className="xl:1/3 lg:w-2/5 sm:w-1/2">
                 <div className="flex items-center w-full justify-between mb-2">
@@ -406,9 +507,25 @@ interface Material {
                   <div className="whitespace-nowrap">{(project.nilai ?? 0).toLocaleString('id-ID')}</div>
                 </div>
                 <div className="flex items-center w-full justify-between mb-2">
+                  <div className="text-white-dark">GM - As Sold :</div>
+                  <div className="whitespace-nowrap">{(project.gm ?? 0).toFixed(1)}%</div>
+                </div>
+                <div className="flex items-center w-full justify-between mb-2">
                   <div className="text-white-dark">Cost :</div>
                   <div>
                     {getTotalCost(project.costs).toLocaleString('id-ID')}
+                  </div>
+                </div>
+                <div className="flex items-center w-full justify-between mb-2">
+                  <div className="text-white-dark">Gross Margin (Rp) :</div>
+                  <div>
+                    {(project.nilai - getTotalCost(project.costs)).toLocaleString('id-ID')}
+                  </div>
+                </div>
+                <div className="flex items-center w-full justify-between mb-2">
+                  <div className="text-white-dark">Gross Margin (%) :</div>
+                  <div>
+                    {((project.nilai - getTotalCost(project.costs))/project.nilai * 100).toFixed(1)}%
                   </div>
                 </div>
                   <CostRatioIndicator 

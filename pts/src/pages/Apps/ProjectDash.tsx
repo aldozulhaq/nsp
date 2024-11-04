@@ -2,7 +2,7 @@ import { useState, Fragment, useEffect, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import 'flatpickr/dist/flatpickr.css';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import { DataTable } from 'mantine-datatable';
+import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import { GetCustomerNameById, GetCustomers } from '../../controllers/customerController';
 import { getProjects } from '../../controllers/projectsController';
 import { NavLink } from 'react-router-dom';
@@ -10,12 +10,63 @@ import { ActionIcon, Button, Checkbox, MultiSelect, SegmentedControl, Stack, Tex
 import { useDebouncedValue } from '@mantine/hooks';
 import IconSearch from '../../components/Icon/IconSearch';
 import IconX from '../../components/Icon/IconX';
+import ProjectDescriptionModal from '../Components/project-detail-description-modal';
+
+interface Project {
+    _id:string;
+    no_project: string;
+    start_date: string;
+    end_date: string;
+    project_name: string,
+    nilai: number
+    deleted: boolean
+    costs: ProjectCosts
+    desc: string
+    project_status: string
+}
+
+interface Manpower {
+    name: string;
+}
+  
+interface Machine {
+    name: string;
+}
+
+interface Material {
+    name: string;
+}
+
+interface ProjectCosts {
+    material_list: {
+      material: Material;
+      amount: number;
+    }[];
+    manpower_list: {
+      manpower: Manpower;
+      amount: number;
+    }[];
+    machine_list: {
+      machine: Machine;
+      amount: number;
+    }[];
+    material_cost: number;
+    manpower_cost: number;
+    machine_cost: number;
+    other_description: {
+        description: String,
+        cost: number,
+        amount: number,
+    }[];
+    other_cost: number
+  }
 
 const Projects = () => {
     const dispatch = useDispatch();
 
-    const [ allProject, setAllProject ] = useState([])
-    const [ initialProject, setInitialProject] = useState([]);
+    const [initialProject, setInitialProject] = useState<Project[]>([]);
+    const [allProject, setAllProject] = useState<Project[]>([]);
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
     
     useEffect(() => {
         dispatch(setPageTitle('Projects'));
@@ -34,28 +85,37 @@ const Projects = () => {
     const [debouncedNoProjectQuery] = useDebouncedValue(noProjectQuery, 200);
     const [archiveFilter, setArchiveFilter] = useState('active')
 
+    const toggleSort = () => {
+        setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    };
+
     useEffect(() => {
-        setAllProject(
-            initialProject.filter((project) => {
-                if (archiveFilter === 'active' && project.deleted) return false;
-                if (archiveFilter === 'archived' && !project.deleted) return false;
+        const filteredProjects = initialProject.filter((project) => {
+            if (archiveFilter === 'active' && project.deleted) return false;
+            if (archiveFilter === 'archived' && !project.deleted) return false;
 
-                if (
-                    debouncedNameQuery !== '' &&
-                    !project.project_name.toLowerCase().includes(debouncedNameQuery.trim().toLowerCase())
-                )
-                    return false;
-    
-                if (
-                    debouncedNoProjectQuery !== '' &&
-                    !project.no_project.toLowerCase().includes(debouncedNoProjectQuery.trim().toLowerCase())
-                )
-                    return false;
+            if (
+                debouncedNameQuery !== '' &&
+                !project.project_name.toLowerCase().includes(debouncedNameQuery.trim().toLowerCase())
+            )
+                return false;
 
-                return true;
-            })
-        );
-    }, [debouncedNameQuery, debouncedNoProjectQuery, initialProject, archiveFilter]);
+            if (
+                debouncedNoProjectQuery !== '' &&
+                !project.no_project.toLowerCase().includes(debouncedNoProjectQuery.trim().toLowerCase())
+            )
+                return false;
+
+            return true;
+        });
+
+        const sortedData = [...filteredProjects].sort((a, b) => {
+            const comparison = a.no_project.localeCompare(b.no_project);
+            return sortDirection === 'asc' ? comparison : -comparison;
+        });
+
+        setAllProject(sortedData);
+    }, [debouncedNameQuery, debouncedNoProjectQuery, initialProject, archiveFilter, sortDirection]);
 
     const CustomerCell = ({ customer }:any) => {
         const [customerName, setCustomerName] = useState('')
@@ -77,12 +137,43 @@ const Projects = () => {
                 day: '2-digit'   
             })
     }
+
+    const getProjectStatusColor = (status: string) => {
+        switch (status) {
+          case 'preparation':
+            return 'bg-blue-500';
+          case 'ongoing':
+            return 'bg-green-500';
+          case 'BASTP':
+            return 'bg-yellow-500';
+          case 'Invoice':
+            return 'bg-orange-500';
+          case 'Closing':
+            return 'bg-red-500';
+          default:
+            return 'bg-gray-500';
+        }
+    };
     
     const colsProject = [
         {
             accessor: 'no_project',
-            title: 'Project No.',
-            noWrap: true,
+            title: (
+                <div className="flex items-center gap-2">                    
+                    <button 
+                        onClick={toggleSort}
+                        className="p-1 hover:bg-gray-100 rounded"
+                    >
+                        {sortDirection === 'asc' ? (
+                            <>↑</>
+                        ) : (
+                            <>↓</>
+                        )}
+                    </button>
+                    <span>Project No.</span>
+                </div>
+            ),
+            Sortable: true,
             render: (data:any) => (
                 <div className={`flex items-center ${data.deleted ? 'text-gray-500' : ''}`}>
                     <span>{data.no_project}</span>
@@ -111,7 +202,8 @@ const Projects = () => {
         {
             accessor: 'project_name',
             title: 'Project Name',
-            noWrap:true,
+            width: 300, // Set width to 25% of the table
+            wrap: true,   // Enable text wrapping
             filter: (
                 <TextInput
                     label="Project Name"
@@ -127,11 +219,11 @@ const Projects = () => {
                     onChange={(e) => setNameQuery(e.currentTarget.value)}
                 />
             ),
-            filtering: nameQuery !== '',
+            filtering: nameQuery !== ''
         },
         {
             accessor: 'customer_name',
-            title: "Customer Name",
+            title: "Customer",
             render: (data:any) => (<CustomerCell customer={data.customer_name} />)
         },
         {
@@ -145,8 +237,14 @@ const Projects = () => {
             render: (data:any) => (<span>{data.start_date?FormatDate(data.end_date):"N/A"}</span>)
         },
         {
+            accessor: 'project_status',
+            title: 'Status',
+            width: 100,
+            render: (data:any) => (<span className={`badge ${getProjectStatusColor(data.project_status)}`}> {data.project_status ?? 'N/A'} </span>)
+        },
+        {
             accessor: 'gm',
-            title: 'Gross Margin',
+            title: 'GM',
             noWrap:true,
             render: (data:any) => (<span>{data.gm}%</span>)
         },
@@ -168,7 +266,10 @@ const Projects = () => {
                 ).toLocaleString('id-ID')}</span>)
         },
     ]
-
+    const formatDescription = (desc: string) => {
+        if (!desc) return 'N/A';
+        return desc.length > 100 ? `${desc.slice(0, 100)}...` : desc;
+      };
     return (
         <div>
             <div className="flex items-center justify-between flex-wrap gap-4">
@@ -190,12 +291,13 @@ const Projects = () => {
                 <div className="table-responsive">
                     <div className='datatables'>
                             <DataTable
-                                className="whitespace-nowrap"
+                                className="whitespace"
                                 columns={colsProject}
                                 records={allProject}
                                 idAccessor='_id'
                                 highlightOnHover
                                 striped
+                                height={500}
                                 withColumnBorders
                                 rowClassName={({ deleted }) => 
                                     deleted ? 'bg-gray-50 text-gray-500 opacity-75' : ''
@@ -203,9 +305,14 @@ const Projects = () => {
                                 rowExpansion={{
                                     content: ({ record }) => (
                                         <div className="w-full bg-gray-100 py-2">
-                                            <div className="grid grid-cols-8 w-full">
+                                            <div className="grid grid-cols-9 w-full">
                                                 {/* Empty space for alignment */}
-                                                <div className="col-span-6"/>
+                                                <span>Desc:</span>
+                                                <div>
+                                                    <span>{formatDescription(record.desc)}</span>
+                                                    {record.desc?<ProjectDescriptionModal description={record.desc} />:''}
+                                                </div>
+                                                <div className="col-span-5"/>                                               
                                                 
                                                 {/* Cost breakdown section */}
                                                 <div className="col-span-2 pr-4">

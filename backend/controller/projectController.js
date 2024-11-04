@@ -174,6 +174,9 @@ const getProjById2 = async (req, res) => {
                   start_date: 1,
                   end_date: 1,
                   nilai: 1,
+                  desc: 1,
+                  project_status: 1,
+                  gm: 1,
                   customer_name: {
                       $arrayElemAt: ["$customer_details", 0]
                   },
@@ -354,9 +357,6 @@ const updateProject = async (req, res) => {
         return res.status(400).json({ error: "Invalid Project ID" });
     }
 
-    // Extract fields that are allowed to be updated
-    const { no_project, start_date, end_date, costs } = req.body;
-
     try {
         // Find the project by ID
         const project = await Project.findById(req.params.id);
@@ -367,13 +367,15 @@ const updateProject = async (req, res) => {
         }
 
         // Extract fields from request body
-        const { no_project, start_date, end_date, costs } = req.body;
+        const { no_project, start_date, end_date, costs, desc, project_status } = req.body;
 
         // Update only the specified fields, initialize them if they don't exist
         if (no_project) project.no_project = no_project;
         if (start_date) project.start_date = start_date;
         if (end_date) project.end_date = end_date;
         if (costs) project.costs = costs;
+        if (desc) project.desc = desc;
+        if (project_status) project.project_status = project_status;
 
         // Save updated project
         await project.save();
