@@ -2,7 +2,7 @@ import { useState, Fragment, useEffect, useContext, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import 'flatpickr/dist/flatpickr.css';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import { DataTable, DataTableSortStatus } from 'mantine-datatable';
+import { DataTable, DataTableSortStatus, useDataTableColumns } from 'mantine-datatable';
 import { GetCustomerNameById, GetCustomers } from '../../controllers/customerController';
 import { getProjects } from '../../controllers/projectsController';
 import { NavLink } from 'react-router-dom';
@@ -154,9 +154,12 @@ const Projects = () => {
             return 'bg-gray-500';
         }
     };
+
+    const storeKey = 'project-table-columns';
     
-    const colsProject = [
-        {
+    const { effectiveColumns, resetColumnsWidth } = useDataTableColumns<Project>({
+        key: storeKey,
+        columns: [{
             accessor: 'no_project',
             title: (
                 <div className="flex items-center gap-2">                    
@@ -173,7 +176,6 @@ const Projects = () => {
                     <span>Project No.</span>
                 </div>
             ),
-            Sortable: true,
             render: (data:any) => (
                 <div className={`flex items-center ${data.deleted ? 'text-gray-500' : ''}`}>
                     <span>{data.no_project}</span>
@@ -198,12 +200,13 @@ const Projects = () => {
                 />
             ),
             filtering: noProjectQuery !== '',
+            resizable: true,
+            width: 150
         },
         {
             accessor: 'project_name',
             title: 'Project Name',
             width: 300, // Set width to 25% of the table
-            wrap: true,   // Enable text wrapping
             filter: (
                 <TextInput
                     label="Project Name"
@@ -219,44 +222,53 @@ const Projects = () => {
                     onChange={(e) => setNameQuery(e.currentTarget.value)}
                 />
             ),
+            resizable: true,
             filtering: nameQuery !== ''
         },
         {
             accessor: 'customer_name',
             title: "Customer",
-            render: (data:any) => (<CustomerCell customer={data.customer_name} />)
+            resizable: true,
+            render: (data:any) => (<CustomerCell customer={data.customer_name} />),
+            width: 150
         },
         {
             accessor: 'start_date',
             title: 'Start',
+            resizable: true,
             render: (data:any) => (<span>{data.start_date?FormatDate(data.start_date):"N/A"}</span>),
         },
         {
             accessor: 'end_date',
             title: 'End',
+            resizable: true,
             render: (data:any) => (<span>{data.start_date?FormatDate(data.end_date):"N/A"}</span>)
         },
         {
             accessor: 'project_status',
             title: 'Status',
             width: 100,
+            resizable: true,
             render: (data:any) => (<span className={`badge ${getProjectStatusColor(data.project_status)}`}> {data.project_status ?? 'N/A'} </span>)
         },
         {
             accessor: 'gm',
             title: 'GM',
             noWrap:true,
+            resizable: true,
             render: (data:any) => (<span>{data.gm}%</span>)
         },
         {
             accessor: 'nilai',
             title: 'Nilai (Rp)',
+            resizable: true,
             render: (data:any) => (<span>{data.nilai.toLocaleString('id-ID')}</span>)
         },
         {
             accessor: 'cost',
-            title: 'Total Cost (Rp)',
-            titleAlign: 'right',
+            title: 'Cost (Rp)',
+            textAlign: 'right',
+            resizable: true,
             render: (data:any) => (<span className="flex justify-end mt-3">{
                 (
                     (data.costs?(data.costs.material_cost?data.costs.material_cost:0) + 
@@ -266,6 +278,8 @@ const Projects = () => {
                 ).toLocaleString('id-ID')}</span>)
         },
     ]
+});
+
     const formatDescription = (desc: string) => {
         if (!desc) return 'N/A';
         return desc.length > 100 ? `${desc.slice(0, 100)}...` : desc;
@@ -285,6 +299,7 @@ const Projects = () => {
                         ]}
                         className="mb-4"
                     />
+                    <Button className='mb-4' onClick={resetColumnsWidth} size="sm">Reset Columns</Button>
                 </div>
             </div>
             <div className="mt-5 panel p-0 border-0 overflow-hidden">
@@ -292,13 +307,14 @@ const Projects = () => {
                     <div className='datatables'>
                             <DataTable
                                 className="whitespace"
-                                columns={colsProject}
+                                columns={effectiveColumns}
                                 records={allProject}
                                 idAccessor='_id'
                                 highlightOnHover
                                 striped
-                                height={500}
+                                height={800}
                                 withColumnBorders
+                                storeColumnsKey={storeKey}
                                 rowClassName={({ deleted }) => 
                                     deleted ? 'bg-gray-50 text-gray-500 opacity-75' : ''
                                 }

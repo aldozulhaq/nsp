@@ -94,7 +94,7 @@ const Dashboard = () => {
                 const sicRes = await GetUsers();
                 const users = sicRes.users
                 const userSics = users.filter((item:any) => {
-                    return item.role.toLowerCase().includes('user')
+                    return (item.role.toLowerCase().includes('user') && item.role.toLowerCase().includes('ots'))
                 })
 
                 const sics = userSics.map((user:any) => ({
