@@ -118,10 +118,10 @@ const CostRatioIndicator: React.FC<CostRatioIndicatorProps> = ({ nilai, totalCos
 
   return (
     <div className="mb-4 space-y-2">
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-between text-sm font-medium">
         <span>Cost to Nilai Ratio: {ratio.toFixed(1)}%</span>
         {ratio >= 100 && (
-          <span className="text-red-500">Warning: Cost exceeds project value!</span>
+          <span className="text-red-500 font-semibold">Warning: Cost exceeds project value!</span>
         )}
       </div>
       <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
@@ -237,26 +237,26 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
     }
   };
   
-    return (
-      <div className="mt-6">
-        <div className="flex justify-between items-center">
-          <div className="text-lg font-semibold uppercase">{title}</div>
-        </div>
-        <div className="table-responsive mt-4">
-          <table className="table-striped w-full">
-            <thead>
-              <tr>
-                <th className="w-16">No</th>
-                <th className="w-128">
-                  {itemType === 'description' ? 'Description' : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`}
-                </th>
-                <th className="w-40">Rate</th>
-                <th className="w-32">Quantity</th>
-                <th className="w-32">Total</th>
-                <th className="w-16"></th>
-              </tr>
-            </thead>
-            <tbody>
+  return (
+    <div className="mt-6">
+      <div className="flex justify-between items-center">
+        <div className="text-lg font-bold tracking-wide text-gray-800">{title}</div>
+      </div>
+      <div className="table-responsive mt-4">
+        <table className="table-striped w-full">
+          <thead>
+            <tr className="text-sm font-semibold text-gray-700">
+              <th className="w-16">No</th>
+              <th className="w-128">
+                {itemType === 'description' ? 'Description' : `${itemType.charAt(0).toUpperCase() + itemType.slice(1)}`}
+              </th>
+              <th className="w-40">Rate</th>
+              <th className="w-32">Quantity</th>
+              <th className="w-32">Total</th>
+              <th className="w-16"></th>
+            </tr>
+          </thead>
+          <tbody className="text-sm">
               {items && items.map((item, index) => (
                 <tr key={index}>
                   <td>{index + 1}</td>
@@ -302,32 +302,32 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr className="bg-gray-50 font-semibold">
-                <td colSpan={4} className="text-right p-2">Total {title}</td>
-                <td className="text-right p-2">
-                  {getTotalCost().toLocaleString('id-ID')}
-                </td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-          <div className="flex justify-end mt-2">
-            <button 
-              type="button" 
-              className="btn btn-primary btn-sm flex items-center space-x-1"
-              onClick={addItem}
-            >
-              <IconPlus className="w-4 h-4" />
-              Add Item
-            </button>
-          </div>
+          <tfoot>
+            <tr className="bg-gray-50 font-bold text-gray-800">
+              <td colSpan={4} className="text-right p-2">Total {title}</td>
+              <td className="text-right p-2">
+                {getTotalCost().toLocaleString('id-ID')}
+              </td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div className="flex justify-end mt-2">
+          <button 
+            type="button" 
+            className="btn btn-primary btn-sm flex items-center space-x-1 font-medium"
+            onClick={addItem}
+          >
+            <IconPlus className="w-4 h-4" />
+            Add Item
+          </button>
         </div>
       </div>
-    );
-  };
-  
-  const ProjectEdit: React.FC = () => {
+    </div>
+  );
+};
+
+const ProjectEdit: React.FC = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id } = useParams<{ id: string }>();
@@ -451,19 +451,19 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
         <form onSubmit={handleSubmit}>
           <div className="panel">
             <div className="flex justify-between flex-wrap gap-4 px-4">
-              <div className="text-2xl font-semibold uppercase">
+              <div className="text-2xl font-bold tracking-wide text-gray-900">
                 Project Edit - {project?.project_name} - {project?.customer_name.name}
               </div>
               <div className="flex gap-2">
                 <button 
                   type="button" 
                   onClick={() => navigate(`/projects/${id}`)} 
-                  className="btn btn-outline-danger"
+                  className="btn btn-outline-danger font-medium"
                 >
                   <IconX className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
                   Cancel
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button type="submit" className="btn btn-primary font-medium">
                   <IconSave className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
                   Save
                 </button>
@@ -476,16 +476,16 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
               <div className="flex-1">
                 <div className="space-y-4">
                   <div>
-                    <label className="block mb-2">No Project</label>
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">No Project</label>
                     <input
                       type="text"
-                      className="form-input"
+                      className="form-input font-bold text-lg"
                       value={formData.no_project}
                       onChange={(e) => setFormData({ ...formData, no_project: e.target.value })}
                     />
                   </div>
                   <div>
-                    <label className="block mb-2">Start Date</label>
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">Start Date</label>
                     <input
                       type="date"
                       className="form-input"
@@ -494,7 +494,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                     />
                   </div>
                   <div>
-                    <label className="block mb-2">End Date</label>
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">End Date</label>
                     <input
                       type="date"
                       className="form-input"
@@ -503,7 +503,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                     />
                   </div>
                   <div>
-                  <label className="block mb-2">Project Status</label>
+                  <label className="block mb-2 font-semibold text-sm text-gray-700">Project Status</label>
                   <Select
                     value={{
                       value: formData.project_status,
@@ -526,7 +526,7 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
                   />
                 </div>
                 <div>
-                  <label className="block mb-2">Project Description</label>
+                  <label className="block mb-2 font-semibold text-sm text-gray-700">Project Description</label>
                   <textarea
                     className="form-input"
                     value={formData.desc}
@@ -539,26 +539,26 @@ const CostTable: React.FC<CostTableProps> = ({ title, items, onItemsChange, item
               <div className="lg:w-1/3">
                 <div className="space-y-4">
                   <div>
-                    <label className="block mb-2">Project Nilai</label>
-                    <div className="form-input bg-gray-100">
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">Project Nilai</label>
+                    <div className="form-input bg-gray-100 font-bold text-lg">
                       {project?.nilai?.toLocaleString('id-ID') || 0}
                     </div>
                   </div>
                   <div>
-                    <label className="block mb-2">Total Cost</label>
-                    <div className="form-input bg-gray-100">
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">Total Cost</label>
+                    <div className="form-input bg-gray-100 font-bold text-lg">
                       {totalCost.toLocaleString('id-ID')}
                     </div>
                   </div>
                   <div>
-                    <label className="block mb-2">Gross Margin (Rp)</label>
-                    <div className="form-input bg-gray-100">
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">Gross Margin (Rp)</label>
+                    <div className="form-input bg-gray-100 font-bold text-lg">
                       {project?.nilai ? (project.nilai - totalCost).toLocaleString('id-ID') : 0}
                     </div>
                   </div>
                   <div>
-                    <label className="block mb-2">Gross Margin (%)</label>
-                    <div className="form-input bg-gray-100">
+                    <label className="block mb-2 font-semibold text-sm text-gray-700">Gross Margin (%)</label>
+                    <div className="form-input bg-gray-100 font-bold text-lg">
                       {project?.nilai ? ((project?.nilai - totalCost)/project?.nilai * 100).toFixed(1) : 0}
                     </div>
                   </div>

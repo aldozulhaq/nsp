@@ -126,7 +126,7 @@ const Projects = () => {
             }
             fetchCustomerName()
         }, [customer])
-        return <span>{customerName}</span>
+        return <span  className="text-sm font-medium">{customerName}</span>
     }
 
     const FormatDate = (date:any) => {
@@ -155,6 +155,12 @@ const Projects = () => {
         }
     };
 
+    
+    const formatDescription = (desc: string) => {
+        if (!desc) return 'N/A';
+        return desc.length > 100 ? `${desc.slice(0, 100)}...` : desc;
+      };
+
     const storeKey = 'project-table-columns';
     
     const { effectiveColumns, resetColumnsWidth } = useDataTableColumns<Project>({
@@ -162,7 +168,7 @@ const Projects = () => {
         columns: [{
             accessor: 'no_project',
             title: (
-                <div className="flex items-center gap-2">                    
+                <div className="flex items-center gap-2 font-bold text-gray-900">                    
                     <button 
                         onClick={toggleSort}
                         className="p-1 hover:bg-gray-100 rounded"
@@ -173,14 +179,14 @@ const Projects = () => {
                             <>↓</>
                         )}
                     </button>
-                    <span>Project No.</span>
+                    <span className='font-bold'>Project No.</span>
                 </div>
             ),
             render: (data:any) => (
                 <div className={`flex items-center ${data.deleted ? 'text-gray-500' : ''}`}>
-                    <span>{data.no_project}</span>
+                    <span className="font-semibold text-base">{data.no_project}</span>
                     {data.deleted && (
-                        <span className="ml-2 px-2 py-1 bg-gray-200 text-gray-600 rounded">Archived</span>
+                        <span className="ml-2 px-2 py-1 bg-gray-200 text-gray-600 rounded text-xs">Archived</span>
                     )}
                 </div>
             ),
@@ -205,8 +211,11 @@ const Projects = () => {
         },
         {
             accessor: 'project_name',
-            title: 'Project Name',
-            width: 300, // Set width to 25% of the table
+            title: <span className="font-bold text-gray-900">Project Name</span>,
+            width: 300,
+            render: (data:any) => (
+                <span className="font-bold text-base">{data.project_name}</span>
+            ),
             filter: (
                 <TextInput
                     label="Project Name"
@@ -227,67 +236,69 @@ const Projects = () => {
         },
         {
             accessor: 'customer_name',
-            title: "Customer",
+            title: <span className="font-bold text-gray-900">Customer</span>,
             resizable: true,
             render: (data:any) => (<CustomerCell customer={data.customer_name} />),
             width: 150
         },
         {
             accessor: 'start_date',
-            title: 'Start',
+            title: <span className="font-bold text-gray-900">Start</span>,
             resizable: true,
-            render: (data:any) => (<span>{data.start_date?FormatDate(data.start_date):"N/A"}</span>),
+            render: (data:any) => (<span className="text-sm">{data.start_date?FormatDate(data.start_date):"N/A"}</span>),
         },
         {
             accessor: 'end_date',
-            title: 'End',
+            title: <span className="font-bold text-gray-900">End</span>,
             resizable: true,
-            render: (data:any) => (<span>{data.start_date?FormatDate(data.end_date):"N/A"}</span>)
+            render: (data:any) => (<span className="text-sm">{data.start_date?FormatDate(data.end_date):"N/A"}</span>)
         },
         {
             accessor: 'project_status',
-            title: 'Status',
+            title: <span className="font-bold text-gray-900">Status</span>,
             width: 100,
             resizable: true,
-            render: (data:any) => (<span className={`badge ${getProjectStatusColor(data.project_status)}`}> {data.project_status ?? 'N/A'} </span>)
+            render: (data:any) => (
+                <span className={`badge ${getProjectStatusColor(data.project_status)} font-medium px-2 py-1`}>
+                    {data.project_status ?? 'N/A'}
+                </span>
+            )
         },
         {
             accessor: 'gm',
-            title: 'GM',
+            title: <span className="font-bold text-gray-900">GM</span>,
             noWrap:true,
             resizable: true,
-            render: (data:any) => (<span>{data.gm}%</span>)
+            render: (data:any) => (<span className="text-sm font-medium">{data.gm}%</span>)
         },
         {
             accessor: 'nilai',
-            title: 'Nilai (Rp)',
+            title: <span className="font-bold text-gray-900">Nilai (Rp)</span>,
             resizable: true,
-            render: (data:any) => (<span>{data.nilai.toLocaleString('id-ID')}</span>)
+            render: (data:any) => (<span className="text-sm font-bold">{data.nilai.toLocaleString('id-ID')}</span>)
         },
         {
             accessor: 'cost',
-            title: 'Cost (Rp)',
+            title: <span className="font-bold text-gray-900">Cost (Rp)</span>,
             textAlign: 'right',
             resizable: true,
-            render: (data:any) => (<span className="flex justify-end mt-3">{
-                (
-                    (data.costs?(data.costs.material_cost?data.costs.material_cost:0) + 
-                    (data.costs.manpower_cost?data.costs.manpower_cost:0) + 
-                    (data.costs.machine_cost?data.costs.machine_cost:0) + 
-                    (data.costs.other_cost?data.costs.other_cost:0):"N/A")
-                ).toLocaleString('id-ID')}</span>)
-        },
-    ]
-});
+            render: (data:any) => (
+                <span className="flex justify-end mt-3 text-sm font-bold">{
+                    (
+                        (data.costs?(data.costs.material_cost?data.costs.material_cost:0) + 
+                        (data.costs.manpower_cost?data.costs.manpower_cost:0) + 
+                        (data.costs.machine_cost?data.costs.machine_cost:0) + 
+                        (data.costs.other_cost?data.costs.other_cost:0):"N/A")
+                    ).toLocaleString('id-ID')}
+                </span>
+            )
+        }]
+    });
 
-    const formatDescription = (desc: string) => {
-        if (!desc) return 'N/A';
-        return desc.length > 100 ? `${desc.slice(0, 100)}...` : desc;
-      };
     return (
         <div>
             <div className="flex items-center justify-between flex-wrap gap-4">
-                <h2 className="text-3xl">Projects List</h2>
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900">Projects List</h2>
                 <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
                     <SegmentedControl
                         value={archiveFilter}
@@ -299,81 +310,72 @@ const Projects = () => {
                         ]}
                         className="mb-4"
                     />
-                    <Button className='mb-4' onClick={resetColumnsWidth} size="sm">Reset Columns</Button>
+                    <Button className="mb-4" onClick={resetColumnsWidth} size="sm">Reset Columns</Button>
                 </div>
             </div>
             <div className="mt-5 panel p-0 border-0 overflow-hidden">
                 <div className="table-responsive">
-                    <div className='datatables'>
-                            <DataTable
-                                className="whitespace"
-                                columns={effectiveColumns}
-                                records={allProject}
-                                idAccessor='_id'
-                                highlightOnHover
-                                striped
-                                height={800}
-                                withColumnBorders
-                                storeColumnsKey={storeKey}
-                                rowClassName={({ deleted }) => 
-                                    deleted ? 'bg-gray-50 text-gray-500 opacity-75' : ''
-                                }
-                                rowExpansion={{
-                                    content: ({ record }) => (
-                                        <div className="w-full bg-gray-100 py-2">
-                                            <div className="grid grid-cols-9 w-full">
-                                                {/* Empty space for alignment */}
-                                                <span>Desc:</span>
-                                                <div>
-                                                    <span>{formatDescription(record.desc)}</span>
-                                                    {record.desc?<ProjectDescriptionModal description={record.desc} />:''}
+                    <div className="datatables">
+                        <DataTable
+                            className="whitespace"
+                            columns={effectiveColumns}
+                            records={allProject}
+                            idAccessor="_id"
+                            highlightOnHover
+                            striped
+                            height={800}
+                            withColumnBorders
+                            storeColumnsKey={storeKey}
+                            rowClassName={({ deleted }) => 
+                                deleted ? 'bg-gray-50 text-gray-500 opacity-75' : ''
+                            }
+                            rowExpansion={{
+                                content: ({ record }) => (
+                                    <div className="w-full bg-gray-100 py-2">
+                                        <div className="grid grid-cols-9 w-full">
+                                            <span className="text-sm font-medium text-gray-600">Desc:</span>
+                                            <div>
+                                                <span className="text-sm">{formatDescription(record.desc)}</span>
+                                                {record.desc ? <ProjectDescriptionModal description={record.desc} /> : ''}
+                                            </div>
+                                            <div className="col-span-5"/>
+                                            
+                                            <div className="col-span-2 pr-4">
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm font-medium text-gray-600">Material Cost:</span>
+                                                    <span className="text-sm font-bold">{record.costs?(record.costs.material_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
                                                 </div>
-                                                <div className="col-span-5"/>                                               
-                                                
-                                                {/* Cost breakdown section */}
-                                                <div className="col-span-2 pr-4">
-                                                    {/* Material Cost */}
-                                                    <div className="flex justify-between items-center py-1">
-                                                        <span className="text-gray-600">Material Cost:</span>
-                                                        <span>{record.costs?(record.costs.material_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
-                                                    </div>
 
-                                                    {/* Machine Cost */}
-                                                    <div className="flex justify-between items-center py-1">
-                                                        <span className="text-gray-600">Machine Cost:</span>
-                                                        <span>{record.costs?(record.costs.machine_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
-                                                    </div>
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm font-medium text-gray-600">Machine Cost:</span>
+                                                    <span className="text-sm font-bold">{record.costs?(record.costs.machine_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
+                                                </div>
 
-                                                    {/* Manpower Cost */}
-                                                    <div className="flex justify-between items-center py-1">
-                                                        <span className="text-gray-600">Manpower Cost:</span>
-                                                        <span>{record.costs?(record.costs.manpower_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
-                                                    </div>
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm font-medium text-gray-600">Manpower Cost:</span>
+                                                    <span className="text-sm font-bold">{record.costs?(record.costs.manpower_cost || "N/A").toLocaleString('id-ID'): "N/A"}</span>
+                                                </div>
 
-                                                    {/* Misc Cost */}
-                                                    <div className="flex justify-between items-center py-1">
-                                                        <span className="text-gray-600">Misc Cost:</span>
-                                                        <span>{record.costs?(record.costs.other_cost || 'N/A').toLocaleString('id-ID'): "N/A"}</span>
-                                                    </div>
+                                                <div className="flex justify-between items-center py-1">
+                                                    <span className="text-sm font-medium text-gray-600">Misc Cost:</span>
+                                                    <span className="text-sm font-bold">{record.costs?(record.costs.other_cost || 'N/A').toLocaleString('id-ID'): "N/A"}</span>
+                                                </div>
 
-                                                    {/* Button container */}
-                                                    <div className="flex justify-end mt-5">
-                                                        <button 
-                                                            className="btn btn-outline-primary"
-                                                            type="button"
-                                                            
-                                                        >
-                                                            <NavLink to={`/projects/${record._id}`}>Detail</NavLink>
-                                                        </button>
-                                                    </div>
+                                                <div className="flex justify-end mt-5">
+                                                    <button 
+                                                        className="btn btn-outline-primary text-sm font-medium"
+                                                        type="button"
+                                                    >
+                                                        <NavLink to={`/projects/${record._id}`}>Detail</NavLink>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
-                                      ),
-                                    allowMultiple: true
-                                    }
-                                }
-                            />
+                                    </div>
+                                ),
+                                allowMultiple: true
+                            }}
+                        />
                     </div>
                 </div>
             </div>

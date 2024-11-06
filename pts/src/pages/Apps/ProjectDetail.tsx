@@ -102,7 +102,7 @@ interface Material {
   
     return (
       <div className="mb-4 space-y-2">
-        <div className="flex justify-between text-xs text-gray-500">
+        <div className="flex justify-between text-sm font-medium">
           <span>Cost to Nilai Ratio: {ratio.toFixed(1)}%</span>
         </div>
         <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
@@ -119,7 +119,7 @@ interface Material {
     if (!data || data.length === 0) {
       return (
         <div className="mt-6">
-          <div className="text-lg font-semibold uppercase">{title}</div>
+          <div className="text-xl font-bold uppercase mb-4">{title}</div>
           <div className="p-4 text-center text-gray-500">No data available</div>
         </div>
       );
@@ -127,10 +127,10 @@ interface Material {
   
     return (
       <div className="table-responsive mt-6">
-        <div className="text-lg font-semibold uppercase">{title}</div>
+        <div className="text-xl font-bold uppercase mb-4">{title}</div>
         <table className="table-striped w-full">
           <thead>
-            <tr>
+            <tr className="text-sm font-semibold">
               <th className="w-16">No</th>
               <th className="w-1/2">Name</th>
               <th className="w-1/6">Rate</th>
@@ -138,14 +138,14 @@ interface Material {
               <th className="w-1/6 text-right">Cost</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text-sm">
             {data.map((item, index) => (
               <tr key={index}>
                 <td>{index + 1}</td>
-                <td>{getItemName(item)}</td>
+                <td className="font-medium">{getItemName(item)}</td>
                 <td className="">{getItemRate(item).toLocaleString('id-ID')}</td>
                 <td className="text-right">{getItemAmount(item)}</td>
-                <td className="text-right">{getItemCost(item).toLocaleString('id-ID')}</td>
+                <td className="text-right font-semibold">{getItemCost(item).toLocaleString('id-ID')}</td>
               </tr>
             ))}
           </tbody>
@@ -169,12 +169,12 @@ interface Material {
         <div></div>
         <div className="ltr:text-right rtl:text-left space-y-2">
           {costItems.map((item, index) => (
-            <div key={index} className="flex items-center">
+            <div key={index} className="flex items-center text-sm">
               <div className="flex-1">{item.label}</div>
-              <div className="w-[37%]">{item.value.toLocaleString('id-ID')}</div>
+              <div className="w-[37%] font-medium">{item.value.toLocaleString('id-ID')}</div>
             </div>
           ))}
-          <div className="flex items-center font-semibold text-lg">
+          <div className="flex items-center text-lg font-bold pt-2 border-t">
             <div className="flex-1">Total Cost</div>
             <div className="w-[37%]">{totalCost.toLocaleString('id-ID')}</div>
           </div>
@@ -459,91 +459,101 @@ const formatDescription = (desc: string) => {
             {project.deleted}
             Restore
           </NavLink>)}
-        </div>
-        <div className="panel">
-          <div className="flex justify-between flex-wrap gap-4 px-4">
-            <div className="text-2xl font-semibold uppercase">Project Detail</div>
           </div>
-  
-          <hr className="border-white-light dark:border-[#1b2e4b] my-6" />
-          <div className="flex justify-between lg:flex-row flex-col gap-6 flex-wrap">
-            <div className="flex-1">
-              <div className="space-y-1 text-white-dark">
-                <div>Customer Name:</div>
-                <div className="text-black dark:text-white font-semibold">{project.customer_name?.name ?? 'N/A'}</div>
+      <div className="panel">
+        <div className="flex justify-between flex-wrap gap-4 px-4">
+          <div className="text-3xl font-bold uppercase">Project Detail</div>
+        </div>
+
+        <hr className="border-white-light dark:border-[#1b2e4b] my-6" />
+        <div className="flex justify-between lg:flex-row flex-col gap-6 flex-wrap">
+          <div className="flex-1">
+            <div className="space-y-4">
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Customer Name</div>
+                <div className="text-lg font-semibold">{project.customer_name?.name ?? 'N/A'}</div>
               </div>
-              <div className="space-y-1 text-white-dark">
-                <div>Project Name:</div>
-                <div className="text-black dark:text-white font-semibold">{project.project_name ?? 'N/A'}</div>
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Project Name</div>
+                <div className="text-lg font-semibold">{project.project_name ?? 'N/A'}</div>
               </div>
-              <div className="space-y-1 text-white-dark">
-                <div>Project Status:</div>
-                <div className={`text-black dark:text-white font-semibold`}> <span className={`badge ${getProjectStatusColor(project.project_status)}`}> {project.project_status ?? 'N/A'} </span> </div>
+              <div>
+                <div className="text-sm text-gray-500 mb-1">Project Status</div>
+                <div className="text-lg">
+                  <span className={`badge ${getProjectStatusColor(project.project_status)} font-semibold`}>
+                    {project.project_status ?? 'N/A'}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="flex justify-between sm:flex-row flex-col gap-6 lg:w-2/3">
-              <div className="xl:1/3 lg:w-2/5 sm:w-1/2">
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">No Project :</div>
-                  <div>{project.no_project ?? 'N/A'}</div>
+          </div>
+          <div className="flex justify-between sm:flex-row flex-col gap-6 lg:w-2/3">
+            <div className="xl:1/3 lg:w-2/5 sm:w-1/2">
+              <div className="space-y-3">
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">No Project</div>
+                  <div className="font-medium">{project.no_project ?? 'N/A'}</div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">Start Date :</div>
-                  <div>{formatDate(project.start_date)}</div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">Start Date</div>
+                  <div className="font-medium">{formatDate(project.start_date)}</div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">End Date :</div>
-                  <div>{formatDate(project.end_date)}</div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">End Date</div>
+                  <div className="font-medium">{formatDate(project.end_date)}</div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">Desc :</div>
-                  <div>{formatDescription(project.desc)}</div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">Desc</div>
+                  <div className="font-medium">{formatDescription(project.desc)}</div>
                 </div>
-                {project.desc?<ProjectDescriptionModal description={project.desc} />:''}
               </div>
-              <div className="xl:1/3 lg:w-2/5 sm:w-1/2">
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">Nilai :</div>
-                  <div className="whitespace-nowrap">{(project.nilai ?? 0).toLocaleString('id-ID')}</div>
+              {project.desc ? <ProjectDescriptionModal description={project.desc} /> : ''}
+            </div>
+            <div className="xl:1/3 lg:w-2/5 sm:w-1/2">
+              <div className="space-y-3">
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">Nilai</div>
+                  <div className="font-bold text-lg">{(project.nilai ?? 0).toLocaleString('id-ID')}</div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">GM - As Sold :</div>
-                  <div className="whitespace-nowrap">{(project.gm ?? 0).toFixed(1)}%</div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">GM - As Sold</div>
+                  <div className="font-bold text-lg">{(project.gm ?? 0).toFixed(1)}%</div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">Cost :</div>
-                  <div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">Cost</div>
+                  <div className="font-bold text-lg">
                     {getTotalCost(project.costs).toLocaleString('id-ID')}
                   </div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">Gross Margin (Rp) :</div>
-                  <div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">Gross Margin (Rp)</div>
+                  <div className="font-bold text-lg">
                     {(project.nilai - getTotalCost(project.costs)).toLocaleString('id-ID')}
                   </div>
                 </div>
-                <div className="flex items-center w-full justify-between mb-2">
-                  <div className="text-white-dark">Gross Margin (%) :</div>
-                  <div>
+                <div className="flex items-center w-full justify-between">
+                  <div className="text-sm text-gray-500">Gross Margin (%)</div>
+                  <div className="font-bold text-lg">
                     {((project.nilai - getTotalCost(project.costs))/project.nilai * 100).toFixed(1)}%
                   </div>
                 </div>
-                  <CostRatioIndicator 
+                <CostRatioIndicator 
                   nilai={project.nilai ?? 0} 
                   totalCost={getTotalCost(project.costs)} 
-                  />
+                />
               </div>
             </div>
           </div>
-  
-          {tables.map((table, index) => (
-            <CostTable key={index} {...table} />
-          ))}
-  
-          <CostSummary costs={project.costs} />
         </div>
+
+        {tables.map((table, index) => (
+          <CostTable key={index} {...table} />
+        ))}
+
+        <CostSummary costs={project.costs} />
       </div>
-    );
-  };
-  
-  export default ProjectDetail;
+    </div>
+  );
+};
+
+export default ProjectDetail;
