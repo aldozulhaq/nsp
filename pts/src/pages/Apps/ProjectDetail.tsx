@@ -469,7 +469,7 @@ const formatDescription = (desc: string) => {
           <div className="flex justify-between lg:flex-row flex-col gap-6 flex-wrap">
             <div className="flex-1">
               <div className="space-y-1 text-white-dark">
-                <div>Issue For:</div>
+                <div>Customer Name:</div>
                 <div className="text-black dark:text-white font-semibold">{project.customer_name?.name ?? 'N/A'}</div>
               </div>
               <div className="space-y-1 text-white-dark">

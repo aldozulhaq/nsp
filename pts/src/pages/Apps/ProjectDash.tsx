@@ -180,7 +180,7 @@ const Projects = () => {
                 <div className={`flex items-center ${data.deleted ? 'text-gray-500' : ''}`}>
                     <span>{data.no_project}</span>
                     {data.deleted && (
-                        <span className="ml-2 px-2 py-1 text-xs bg-gray-200 text-gray-600 rounded">Archived</span>
+                        <span className="ml-2 px-2 py-1 bg-gray-200 text-gray-600 rounded">Archived</span>
                     )}
                 </div>
             ),
@@ -287,7 +287,7 @@ const Projects = () => {
     return (
         <div>
             <div className="flex items-center justify-between flex-wrap gap-4">
-                <h2 className="text-xl">Projects List</h2>
+                <h2 className="text-3xl">Projects List</h2>
                 <div className="flex sm:flex-row flex-col sm:items-center sm:gap-3 gap-4 w-full sm:w-auto">
                     <SegmentedControl
                         value={archiveFilter}
