@@ -313,7 +313,7 @@ const Projects = () => {
                     <Button className="mb-4" onClick={resetColumnsWidth} size="sm">Reset Columns</Button>
                 </div>
             </div>
-            <div className="mt-5 panel p-0 border-0 overflow-hidden">
+            <div className="mt-5 panel p-0 border-0">
                 <div className="table-responsive">
                     <div className="datatables">
                         <DataTable
