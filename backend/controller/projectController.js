@@ -3,12 +3,15 @@ import Project from "../models/projectModel.js"
 import { Machine, Manpower, Material } from "../models/costDetailsModel.js"
 
 const getProj = async (req, res) => {
-    try {
-        const projects = await Project.find().sort({ no: "desc"})
-        res.status(200).json({ projects })
-    } catch (err) {
-        res.status(500).json({ error: err.message })
-    }
+  try {
+      const projects = await Project.find()
+          .populate('customer_name', 'name')
+          .sort({ no: "desc" });
+
+      res.status(200).json({ projects });
+  } catch (err) {
+      res.status(500).json({ error: err.message });
+  }
 }
 
 const getProjById = async (req, res) => {

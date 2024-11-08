@@ -144,7 +144,7 @@ const ProjectSchema = new mongoose.Schema({
     customer_name: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "Customer"
+        ref: "Costumer"
     },
     project_name: {
         type: String,

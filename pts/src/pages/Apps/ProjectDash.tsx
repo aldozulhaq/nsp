@@ -11,6 +11,7 @@ import { useDebouncedValue } from '@mantine/hooks';
 import IconSearch from '../../components/Icon/IconSearch';
 import IconX from '../../components/Icon/IconX';
 import ProjectDescriptionModal from '../Components/project-detail-description-modal';
+import ProjectTable from '../Components/responsive-table';
 
 interface Project {
     _id:string;
@@ -238,7 +239,7 @@ const Projects = () => {
             accessor: 'customer_name',
             title: <span className="font-bold text-gray-900">Customer</span>,
             resizable: true,
-            render: (data:any) => (<CustomerCell customer={data.customer_name} />),
+            render: (data:any) => (<span>{data.customer_name.name}</span>),
             width: 150
         },
         {
@@ -310,13 +311,25 @@ const Projects = () => {
                         ]}
                         className="mb-4"
                     />
-                    <Button className="mb-4" onClick={resetColumnsWidth} size="sm">Reset Columns</Button>
+                    <div className='max-md:hidden'>
+                        <Button className="mb-4" onClick={resetColumnsWidth} size="sm">Reset Columns</Button>
+                    </div>
                 </div>
             </div>
             <div className="mt-5 panel p-0 border-0">
-                <div className="table-responsive">
-                    <div className="datatables">
-                        <DataTable
+                <div className="">
+                    <div className="">
+                        <ProjectTable
+                            data={allProject}
+                            columns={effectiveColumns}
+                            sortDirection={sortDirection}
+                            toggleSort={toggleSort}
+                            nameQuery={nameQuery}
+                            setNameQuery={setNameQuery}
+                            noProjectQuery={noProjectQuery}
+                            setNoProjectQuery={setNoProjectQuery}
+                        />
+                        {/* <DataTable
                             className="whitespace"
                             columns={effectiveColumns}
                             records={allProject}
@@ -375,7 +388,7 @@ const Projects = () => {
                                 ),
                                 allowMultiple: true
                             }}
-                        />
+                        /> */}
                     </div>
                 </div>
             </div>
