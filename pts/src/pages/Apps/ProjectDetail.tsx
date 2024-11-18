@@ -12,6 +12,7 @@ import IconTrash from '../../components/Icon/IconTrash';
 import Swal from 'sweetalert2';
 import IconX from '../../components/Icon/IconX';
 import ProjectDescriptionModal from '../Components/project-detail-description-modal';
+import { SegmentedControl } from '@mantine/core';
 
 interface Material {
     name: string;
@@ -210,7 +211,7 @@ interface Material {
       <div className="ltr:text-right rtl:text-left space-y-2 bg-gray-50 p-4 rounded-lg mt-6">
         {type && (
           <div className="text-lg font-bold text-blue-600 mb-4">
-            {type} Costs Summary
+            {type === 'Master'? 'As Sold' : type} Costs Summary
           </div>
         )}
         {costItems.map((item, index) => (
@@ -304,7 +305,7 @@ interface Material {
         
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-sm text-gray-500 mb-1">Master Total</div>
+            <div className="text-sm text-gray-500 mb-1">As Sold Total</div>
             <div className="text-lg font-bold">{masterTotal.toLocaleString('id-ID')}</div>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -412,7 +413,7 @@ interface Material {
             <>
               <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
                 <div className="space-y-6">
-                  <h2 className="text-xl font-bold">Master Costs</h2>
+                  <h2 className="text-xl font-bold">As Sold Costs</h2>
                   <div className="lg:min-h-[600px]">
                     {getTables(project.master_costs, 'Master').map((table, index) => (
                       <CostTable key={index} {...table} />
@@ -720,8 +721,8 @@ const formatDescription = (desc: string) => {
         </div>
 
         { userCanSeeMaster && (
-        <div className="flex justify-center border rounded-lg overflow-hidden w-full md:w-fit mx-auto my-6">
-          {['actual', 'master', 'all'].map((option) => (
+        <div className="flex justify-center rounded-lg overflow-hidden w-full md:w-fit mx-auto my-6">
+          {/* {['actual', 'master', 'all'].map((option) => (
             <button
               key={option}
               className={`
@@ -733,7 +734,17 @@ const formatDescription = (desc: string) => {
             >
               {option.charAt(0).toUpperCase() + option.slice(1)}
             </button>
-          ))}
+          ))} */}
+          <SegmentedControl
+                value={view}
+                onChange={(value: string) => setView(value as string)}
+                data={[
+                  { label: 'As Sold', value: 'master' },
+                  { label: 'Actual', value: 'actual' },
+                  { label: 'All', value: 'all' }
+                ]}
+                className="mb-4"
+              />
         </div>
         )}
 

@@ -635,7 +635,7 @@ const ProjectEdit: React.FC = () => {
                 value={costView}
                 onChange={(value: string) => setCostView(value as CostView)}
                 data={[
-                  { label: 'Master', value: 'master' },
+                  { label: 'As Sold', value: 'master' },
                   { label: 'Actual', value: 'actual' },
                 ]}
                 className="mb-4"
