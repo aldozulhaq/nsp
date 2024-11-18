@@ -1,4 +1,4 @@
-import { useState, Fragment, useEffect } from 'react';
+import { useState, Fragment, useEffect, useCallback, useMemo } from 'react';
 import { DataTable } from 'mantine-datatable';
 import { useMediaQuery } from '@mantine/hooks';
 import { NavLink } from 'react-router-dom';
@@ -15,25 +15,26 @@ const ProjectTable = ({
   nameQuery,
   setNameQuery,
   noProjectQuery,
-  setNoProjectQuery
-}:any) => {
+  setNoProjectQuery,
+  storeColumnsKey
+}: any) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-  const formatDescription = (desc:string) => {
+  const formatDescription = (desc: string) => {
     if (!desc) return 'N/A';
     return desc.length > 100 ? `${desc.slice(0, 100)}...` : desc;
   };
 
-  const FormatDate = (date:any) => {
+  const FormatDate = (date: any) => {
     const formattedDate = new Date(date);
-        return formattedDate.toLocaleDateString('en-UK', {
-            year: 'numeric',
-            month: 'short',  
-            day: '2-digit'   
-        })
-  }
+    return formattedDate.toLocaleDateString('en-UK', {
+      year: 'numeric',
+      month: 'short',  
+      day: '2-digit'   
+    });
+  };
 
-  const getMobileColumns = () => [
+  const getMobileColumns = useMemo(() => [
     {
       accessor: 'no_project',
       title: (
@@ -57,10 +58,10 @@ const ProjectTable = ({
           label="Project No"
           description="Show projects whose numbers include the specified text"
           placeholder="Search project numbers..."
-          leftSection={<IconSearch/>}
+          leftSection={<IconSearch />}
           rightSection={
             <ActionIcon size="sm" variant="transparent" color="gray" onClick={() => setNoProjectQuery('')}>
-              <IconX/>
+              <IconX />
             </ActionIcon>
           }
           value={noProjectQuery}
@@ -68,7 +69,7 @@ const ProjectTable = ({
         />
       ),
       filtering: noProjectQuery !== '',
-      render: (data:any) => (
+      render: (data: any) => (
         <div className="space-y-1">
           <div className={`flex items-center ${data.deleted ? 'text-gray-500' : ''}`}>
             <span className="font-semibold text-sm">{data.no_project}</span>
@@ -79,7 +80,7 @@ const ProjectTable = ({
             )}
           </div>
           <div className="text-xs text-gray-500">
-          {data.start_date?FormatDate(data.start_date):"N/A"} - {data.end_date?FormatDate(data.end_date):"N/A"}
+            {data.start_date ? FormatDate(data.start_date) : "N/A"} - {data.end_date ? FormatDate(data.end_date) : "N/A"}
           </div>
         </div>
       ),
@@ -93,10 +94,10 @@ const ProjectTable = ({
           label="Project Name"
           description="Show projects whose names include the specified text"
           placeholder="Search project names..."
-          leftSection={<IconSearch/>}
+          leftSection={<IconSearch />}
           rightSection={
             <ActionIcon size="sm" variant="transparent" color="gray" onClick={() => setNameQuery('')}>
-              <IconX/>
+              <IconX />
             </ActionIcon>
           }
           value={nameQuery}
@@ -104,7 +105,7 @@ const ProjectTable = ({
         />
       ),
       filtering: nameQuery !== '',
-      render: (data:any) => (
+      render: (data: any) => (
         <div className="space-y-2">
           <div>
             <div className="font-medium text-sm">{data.project_name}</div>
@@ -125,18 +126,18 @@ const ProjectTable = ({
         </div>
       ),
     },
-  ];
+  ], [sortDirection, nameQuery, noProjectQuery]);
 
-  const getTotalCost = (costs:any) => {
+  const getTotalCost = useCallback((costs: any) => {
     if (!costs) return 'N/A';
     const total = (costs.material_cost || 0) + 
                  (costs.manpower_cost || 0) + 
                  (costs.machine_cost || 0) + 
                  (costs.other_cost || 0);
     return total.toLocaleString('id-ID');
-  };
+  }, []);
 
-  const getProjectStatusColor = (status:string) => {
+  const getProjectStatusColor = useCallback((status: string) => {
     switch (status) {
       case 'preparation':
         return 'bg-blue-500';
@@ -151,10 +152,10 @@ const ProjectTable = ({
       default:
         return 'bg-gray-500';
     }
-  };
+  }, []);
 
-  const rowExpansion = {
-    content: ({ record }:any) => (
+  const rowExpansion = useMemo(() => ({
+    content: ({ record }: any) => (
       <div className="w-full bg-gray-100 py-2">
         <div className="grid grid-cols-1 md:grid-cols-9 w-full gap-4 px-4">
           <div className="md:col-span-2">
@@ -165,7 +166,7 @@ const ProjectTable = ({
             </div>
           </div>
           
-          <div className="md:col-span-5"/>
+          <div className="md:col-span-5" />
           
           <div className="md:col-span-2 space-y-2">
             <div className="flex justify-between items-center">
@@ -209,19 +210,20 @@ const ProjectTable = ({
       </div>
     ),
     allowMultiple: true
-  };
+  }), [formatDescription]);
 
   return (
     <DataTable
       className="whitespace"
-      columns={isMobile ? getMobileColumns() : columns}
+      columns={isMobile ? getMobileColumns : columns}
       records={data}
       idAccessor="_id"
+      storeColumnsKey={isMobile ? null : storeColumnsKey}
       highlightOnHover
       striped
-      height={800}
+      height="84vh"
       withColumnBorders
-      rowClassName={({ deleted }:any) => 
+      rowClassName={({ deleted }: any) => 
         deleted ? 'bg-gray-50 text-gray-500 opacity-75' : ''
       }
       rowExpansion={rowExpansion}

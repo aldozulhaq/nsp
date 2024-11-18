@@ -6,6 +6,7 @@ import ProjectEdit from '../pages/Apps/ProjectEdit';
 import ResourceManagement from '../pages/Apps/Resource';
 import Resource from '../pages/Apps/Resource';
 import { UserContext } from '../contexts/UserContext';
+import Dashboard from '../pages/Apps/Dashboard';
 const NotFound = lazy(() => import('../pages/Apps/404'));
 const UserTable = lazy(() => import('../pages/Apps/UsersTable'))
 const Tabs = lazy(() => import('../pages/Components/Tabs'));
@@ -78,8 +79,7 @@ const checkUserAuthentication = () => {
 function CheckUserRolePermission(role:string) {
     const uRole = localStorage.getItem("role")
     // if admin or dev or role is same as user role
-    if(uRole == "admin" || uRole == "admin_pts" || uRole == "dev"
-        || (uRole?.toLowerCase().includes("pts") && uRole?.toLowerCase().includes(role))
+    if(uRole == "dev" || (uRole?.toLowerCase().includes("pts") && uRole?.toLowerCase().includes(role))
     ) {
         return true
     } else
@@ -89,11 +89,6 @@ function CheckUserRolePermission(role:string) {
 function PrivateRoutePTS({ children }:any) {
     const isAuthenticated = checkUserAuthentication();
     return isAuthenticated && CheckUserRolePermission("user") ? children : handleLogout();
-}
-
-function PrivateRoute({ children }:any) {
-    const isAuthenticated = checkUserAuthentication();
-    return isAuthenticated ? children : <Navigate to="/login" />;
 }
 
 function AdminRoute({ children }:any) {
@@ -122,11 +117,19 @@ const handleLogout = () => {
 const routes = [
     // dashboard
     {
-        path: '/',
+        path: '/Projects',
         element: 
         <PrivateRoutePTS>
             <Projects/>
         </PrivateRoutePTS>,
+    },
+    {
+        path: '/', 
+        element: (
+          <PrivateRoutePTS>
+            <Dashboard/>
+          </PrivateRoutePTS>
+        ),
     },
     {
         path: '/Projects/:id',  // Dynamic route with ID parameter

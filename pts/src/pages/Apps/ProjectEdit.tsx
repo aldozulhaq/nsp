@@ -7,6 +7,7 @@ import IconSave from '../../components/Icon/IconSave';
 import IconPlus from '../../components/Icon/IconPlus';
 import { getProjectDetail, updateProject } from '../../controllers/projectsController';
 import Select, { SingleValue } from 'react-select';
+import { SegmentedControl } from '@mantine/core';
 
 interface ItemOption {
   value: string;
@@ -77,6 +78,7 @@ interface Project {
   end_date: string;
   nilai?: number;
   costs?: ProjectCosts;
+  master_costs?: ProjectCosts;
   customer_name: CustomerDetails;
   project_name: string;
   project_status: string;
@@ -90,6 +92,7 @@ interface FormData {
   costs: ProjectCosts;
   project_status: string;
   desc: string;
+  master_costs: ProjectCosts;
 }
 
 interface CostRatioIndicatorProps {
@@ -105,6 +108,8 @@ interface CostTableProps {
   calculateCosts: () => void;
   readOnlyTotal?: boolean;
 }
+
+type CostView = 'master' | 'actual';
 
 const CostRatioIndicator: React.FC<CostRatioIndicatorProps> = ({ nilai, totalCost }) => {
   const ratio = nilai ? (totalCost / nilai) * 100 : 0;
@@ -350,11 +355,33 @@ const ProjectEdit: React.FC = () => {
       },
       project_status: '',
       desc: '',
+      master_costs: {
+        material_cost: 0,
+        material_list: [],
+        manpower_cost: 0,
+        manpower_list: [],
+        machine_cost: 0,
+        machine_list: [],
+        other_cost: 0,
+        other_description: [],
+      },
     });
+
+    const [costView, setCostView] = useState<CostView>('actual');
+
+    const [userCanSeeMaster, setUserCanSeeMaster] = useState<boolean>(false);
+
+    const checkUser = () => {
+      const uRole = localStorage.getItem("role")
+      if (uRole?.toLowerCase().includes("mod") || uRole === "dev") {
+        setUserCanSeeMaster(true)
+      }
+    }
   
     useEffect(() => {
       dispatch(setPageTitle('Project Edit'));
       fetchProject();
+      checkUser();
     }, []);
   
     const fetchProject = async () => {
@@ -377,6 +404,16 @@ const ProjectEdit: React.FC = () => {
           },
           project_status: response.project.project_status || '',
           desc: response.project.desc || '',
+          master_costs: response.project.master_costs || {
+            material_cost: 0,
+            material_list: [],
+            manpower_cost: 0,
+            manpower_list: [],
+            machine_cost: 0,
+            machine_list: [],
+            other_cost: 0,
+            other_description: [],
+          },
         });
         setIsLoading(false);
       } catch (error) {
@@ -388,32 +425,54 @@ const ProjectEdit: React.FC = () => {
     useEffect(() => {
       calculateCosts();
     }, [
+      costView,
       formData.costs.material_list,
       formData.costs.manpower_list,
       formData.costs.machine_list,
-      formData.costs.other_description
+      formData.costs.other_description,
+      formData.master_costs?.material_list,
+      formData.master_costs?.manpower_list,
+      formData.master_costs?.machine_list,
+      formData.master_costs?.other_description
     ]);
 
     useEffect(() => {
-      const total = calculateTotalCost();
+      const costs = costView === 'master' ? formData.master_costs : formData.costs;
+      const total = (
+        costs?.material_cost +
+        costs?.manpower_cost +
+        costs?.machine_cost +
+        costs?.other_cost
+      ) || 0;
       setTotalCost(total);
     }, [
+      costView,
       formData.costs.material_cost,
       formData.costs.manpower_cost,
       formData.costs.machine_cost,
-      formData.costs.other_cost
+      formData.costs.other_cost,
+      formData.master_costs?.material_list,
+      formData.master_costs?.manpower_list,
+      formData.master_costs?.machine_list,
+      formData.master_costs?.other_description
     ]);
   
     const calculateCosts = () => {
-      const materialCost = formData.costs.material_list?.reduce((total, item) => total + (item?.amount * (item.material.unit_cost || 0)), 0) ?? 0;
-      const manpowerCost = formData.costs.manpower_list?.reduce((total, item) => total + (item?.amount * (item.manpower.unit_cost || 0)), 0) ?? 0;
-      const machineCost = formData.costs.machine_list?.reduce((total, item) => total + (item?.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
-      const otherCost = formData.costs.other_description?.reduce((total, item) => total + (item?.cost * item.amount), 0) ?? 0;
+      const costs = costView === 'master' ? formData.master_costs : formData.costs;
+
+      const materialCost = costs.material_list?.reduce((total, item) => 
+        total + (item?.amount * (item.material.unit_cost || 0)), 0) ?? 0;
+      const manpowerCost = costs.manpower_list?.reduce((total, item) => 
+        total + (item?.amount * (item.manpower.unit_cost || 0)), 0) ?? 0;
+      const machineCost = costs.machine_list?.reduce((total, item) => 
+        total + (item?.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
+      const otherCost = costs.other_description?.reduce((total, item) => 
+        total + (item?.cost * item.amount), 0) ?? 0;
   
       setFormData((prev) => ({
         ...prev,
-        costs: {
-          ...prev.costs,
+        [costView === 'master' ? 'master_costs' : 'costs']: {
+          ...(costView === 'master' ? prev.master_costs : prev.costs),
           material_cost: materialCost,
           manpower_cost: manpowerCost,
           machine_cost: machineCost,
@@ -569,17 +628,31 @@ const ProjectEdit: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            { userCanSeeMaster && (
+            <div className="mt-8">
+              <SegmentedControl
+                value={costView}
+                onChange={(value: string) => setCostView(value as CostView)}
+                data={[
+                  { label: 'Master', value: 'master' },
+                  { label: 'Actual', value: 'actual' },
+                ]}
+                className="mb-4"
+              />
+            </div>
+            )}
   
             <CostTable
               title="Material List"
-              items={formData.costs.material_list}
+              items={costView === 'master' ? formData.master_costs.material_list : formData.costs.material_list}
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  costs: { 
-                    ...formData.costs, 
+                  [costView === 'master' ? 'master_costs' : 'costs']: { 
+                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
                     material_list: items 
-                  } 
+                  }
                 })
               }
               itemType="material"
@@ -588,14 +661,14 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Manpower List"
-              items={formData.costs.manpower_list}
+              items={costView === 'master' ? formData.master_costs.manpower_list : formData.costs.manpower_list}
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  costs: { 
-                    ...formData.costs, 
+                  [costView === 'master' ? 'master_costs' : 'costs']: { 
+                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
                     manpower_list: items 
-                  } 
+                  }
                 })
               }
               itemType="manpower"
@@ -604,14 +677,14 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Machine List"
-              items={formData.costs.machine_list}
+              items={costView === 'master' ? formData.master_costs.machine_list : formData.costs.machine_list}
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  costs: { 
-                    ...formData.costs, 
+                  [costView === 'master' ? 'master_costs' : 'costs']: { 
+                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
                     machine_list: items 
-                  } 
+                  }
                 })
               }
               itemType="machine"
@@ -620,14 +693,14 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Misc List"
-              items={formData.costs.other_description}
+              items={costView === 'master' ? formData.master_costs.other_description : formData.costs.other_description}
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  costs: { 
-                    ...formData.costs, 
+                  [costView === 'master' ? 'master_costs' : 'costs']: { 
+                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
                     other_description: items 
-                  } 
+                  }
                 })
               }
               itemType="description"

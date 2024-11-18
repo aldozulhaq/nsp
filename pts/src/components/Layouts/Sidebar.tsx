@@ -110,20 +110,20 @@ const Sidebar = () => {
                                     <div className="flex items-center">
                                         <IconMenuDashboard
                                          className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Project')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Dashboard')}</span>
                                     </div>
                                 </NavLink>
                             </li>
 
-                            {/* <li className="menu nav-item">
-                                <NavLink to="/Customers" className="group">
+                            <li className="menu nav-item">
+                                <NavLink to="/Projects" className="group">
                                     <div className="flex items-center">
                                         <IconMenuTables
                                          className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Customers')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Projects')}</span>
                                     </div>
                                 </NavLink>
-                            </li> */}
+                            </li>
 
                             {checkIfAdmin()}
 

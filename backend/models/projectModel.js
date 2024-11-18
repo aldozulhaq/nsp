@@ -167,6 +167,7 @@ const ProjectSchema = new mongoose.Schema({
         required: true
     },
     costs: CostSchema,
+    master_costs: CostSchema,
     desc: {
         type: String,
         required: false

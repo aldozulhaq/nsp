@@ -66,6 +66,7 @@ interface Material {
     start_date: string;
     end_date: string;
     costs: ProjectCosts;
+    master_costs: ProjectCosts;
     customer_name: CustomerDetails,
     project_name: string,
     nilai: number
@@ -116,6 +117,7 @@ interface Material {
   };
   
   const CostTable: React.FC<CostTableProps> = ({ title, data = [], getItemName, getItemRate, getItemAmount, getItemCost }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
     if (!data || data.length === 0) {
       return (
         <div className="mt-6">
@@ -126,35 +128,75 @@ interface Material {
     }
   
     return (
-      <div className="table-responsive mt-6">
-        <div className="text-xl font-bold uppercase mb-4">{title}</div>
-        <table className="table-striped w-full">
-          <thead>
-            <tr className="text-sm font-semibold">
-              <th className="w-16">No</th>
-              <th className="w-1/2">Name</th>
-              <th className="w-1/6">Rate</th>
-              <th className="w-1/6 text-right">Quantity</th>
-              <th className="w-1/6 text-right">Cost</th>
-            </tr>
-          </thead>
-          <tbody className="text-sm">
-            {data.map((item, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td className="font-medium">{getItemName(item)}</td>
-                <td className="">{getItemRate(item).toLocaleString('id-ID')}</td>
-                <td className="text-right">{getItemAmount(item)}</td>
-                <td className="text-right font-semibold">{getItemCost(item).toLocaleString('id-ID')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-6">
+        <div 
+          className={`
+            flex items-center justify-between 
+            cursor-pointer bg-gray-50 dark:bg-gray-700 
+            p-4 rounded-t-lg
+            transition-all duration-200
+            hover:bg-gray-100 dark:hover:bg-gray-600
+            ${!isExpanded && 'rounded-b-lg'}
+          `}
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center space-x-4">
+            <div className="text-xl font-bold uppercase">{title}</div>
+            <div className="text-sm text-gray-500">
+              ({data.length} items)
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-500 mr-2">
+              {isExpanded ? 'Click to collapse' : 'Click to expand'}
+            </span>
+            <div className="transform transition-transform duration-200">
+              {isExpanded ? (
+                <>↑</>
+              ) : (
+                <>↓</>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <div className={`
+          transform transition-all duration-300 origin-top
+          overflow-hidden
+          ${isExpanded ? 'scale-y-100 opacity-100' : 'scale-y-0 opacity-0 h-0'}
+        `}>
+          <div className="table-responsive">
+            <table className="table-striped w-full">
+              <thead>
+                <tr className="text-sm font-semibold">
+                  <th className="w-16">No</th>
+                  <th className="w-1/2">Name</th>
+                  <th className="w-1/6">Rate</th>
+                  <th className="w-1/6 text-right">Quantity</th>
+                  <th className="w-1/6 text-right">Cost</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {data.map((item, index) => (
+                  <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
+                    <td>{index + 1}</td>
+                    <td className="font-medium">{getItemName(item)}</td>
+                    <td className="">{getItemRate(item).toLocaleString('id-ID')}</td>
+                    <td className="text-right">{getItemAmount(item)}</td>
+                    <td className="text-right font-semibold">
+                      {getItemCost(item).toLocaleString('id-ID')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
   };
   
-  const CostSummary: React.FC<{ costs: any }> = ({ costs }) => {
+  const CostSummary = ({ costs, type }:any) => {
     const costItems = [
       { label: 'Total Material Cost', value: costs?.material_cost ?? 0 },
       { label: 'Total Manpower Cost', value: costs?.manpower_cost ?? 0 },
@@ -165,19 +207,21 @@ interface Material {
     const totalCost = costItems.reduce((sum, item) => sum + item.value, 0);
   
     return (
-      <div className="grid sm:grid-cols-2 grid-cols-1 px-4 mt-6">
-        <div></div>
-        <div className="ltr:text-right rtl:text-left space-y-2">
-          {costItems.map((item, index) => (
-            <div key={index} className="flex items-center text-sm">
-              <div className="flex-1">{item.label}</div>
-              <div className="w-[37%] font-medium">{item.value.toLocaleString('id-ID')}</div>
-            </div>
-          ))}
-          <div className="flex items-center text-lg font-bold pt-2 border-t">
-            <div className="flex-1">Total Cost</div>
-            <div className="w-[37%]">{totalCost.toLocaleString('id-ID')}</div>
+      <div className="ltr:text-right rtl:text-left space-y-2 bg-gray-50 p-4 rounded-lg mt-6">
+        {type && (
+          <div className="text-lg font-bold text-blue-600 mb-4">
+            {type} Costs Summary
           </div>
+        )}
+        {costItems.map((item, index) => (
+          <div key={index} className="flex items-center text-sm">
+            <div className="flex-1">{item.label}</div>
+            <div className="w-[37%] font-medium">{item.value.toLocaleString('id-ID')}</div>
+          </div>
+        ))}
+        <div className="flex items-center text-lg font-bold pt-2 border-t">
+          <div className="flex-1">Total Cost</div>
+          <div className="w-[37%]">{totalCost.toLocaleString('id-ID')}</div>
         </div>
       </div>
     );
@@ -233,15 +277,89 @@ interface Material {
       </div>
     );
   };
+
+  const ComparisonSummary = ({ masterCosts, actualCosts, nilai }:any) => {
+    const getTotalCost = (costs:any) => {
+      return (
+        (costs?.material_cost ?? 0) +
+        (costs?.manpower_cost ?? 0) +
+        (costs?.machine_cost ?? 0) +
+        (costs?.other_cost ?? 0)
+      );
+    };
+  
+    const masterTotal = getTotalCost(masterCosts);
+    const actualTotal = getTotalCost(actualCosts);
+    const difference = actualTotal - masterTotal;
+    const percentageDiff = ((difference / masterTotal) * 100).toFixed(1);
+  
+    const masterGrossMargin = nilai - masterTotal;
+    const actualGrossMargin = nilai - actualTotal;
+    const masterGrossMarginPercentage = ((masterGrossMargin / nilai) * 100).toFixed(1);
+    const actualGrossMarginPercentage = ((actualGrossMargin / nilai) * 100).toFixed(1);
+  
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm mt-6">
+        <h3 className="text-xl font-bold mb-4">Cost Comparison Summary</h3>
+        
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-sm text-gray-500 mb-1">Master Total</div>
+            <div className="text-lg font-bold">{masterTotal.toLocaleString('id-ID')}</div>
+          </div>
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-sm text-gray-500 mb-1">Actual Total</div>
+            <div className="text-lg font-bold">{actualTotal.toLocaleString('id-ID')}</div>
+          </div>
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-sm text-gray-500 mb-1">Difference</div>
+            <div className={`text-lg font-bold ${difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
+              {difference.toLocaleString('id-ID')} ({difference > 0 ? '+' : ''}{percentageDiff}%)
+            </div>
+          </div>
+        </div>
+  
+        {/* <h3 className="text-xl font-bold mb-4">Gross Margin Comparison</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-sm text-gray-500 mb-2">Master Gross Margin</div>
+            <div className="text-lg font-bold">{masterGrossMargin.toLocaleString('id-ID')}</div>
+            <div className="text-sm font-medium">{masterGrossMarginPercentage}%</div>
+          </div>
+          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="text-sm text-gray-500 mb-2">Actual Gross Margin</div>
+            <div className="text-lg font-bold">{actualGrossMargin.toLocaleString('id-ID')}</div>
+            <div className="text-sm font-medium">{actualGrossMarginPercentage}%</div>
+          </div>
+        </div> */}
+      </div>
+    );
+  };
   
   const ProjectDetail = () => {
+
+    const baseSegmentStyle = "px-4 py-2 text-sm font-medium transition-colors duration-200";
+    const activeSegmentStyle = "bg-blue-500 text-white rounded shadow-sm";
+    const inactiveSegmentStyle = "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700";
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id } = useParams();
     const [project, setProject] = useState<Project | null>(null);
+    const [view, setView] = useState('actual');
+
+    const [userCanSeeMaster, setUserCanSeeMaster] = useState<boolean>(false);
+
+    const checkUser = () => {
+      const uRole = localStorage.getItem("role")
+      if (uRole?.toLowerCase().includes("mod") || uRole === "dev") {
+        setUserCanSeeMaster(true)
+      }
+    }
   
     useEffect(() => {
       dispatch(setPageTitle('Project Detail'));
+      checkUser();
     });
   
     useEffect(() => {
@@ -277,35 +395,90 @@ interface Material {
     };
   
     if (!project) return <div>Loading...</div>;
+
+    const renderCostContent = () => {
+      switch (view) {
+        case 'master':
+          return (
+            <>
+              {getTables(project.master_costs).map((table, index) => (
+                <CostTable key={index} {...table} />
+              ))}
+              <CostSummary costs={project.master_costs} type="Master" />
+            </>
+          );
+        case 'all':
+          return (
+            <>
+              <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
+                <div className="space-y-6">
+                  <h2 className="text-xl font-bold">Master Costs</h2>
+                  <div className="lg:min-h-[600px]">
+                    {getTables(project.master_costs, 'Master').map((table, index) => (
+                      <CostTable key={index} {...table} />
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <h2 className="text-xl font-bold">Actual Costs</h2>
+                  <div className="lg:min-h-[600px]">
+                    {getTables(project.costs, 'Actual').map((table, index) => (
+                      <CostTable key={index} {...table} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="grid lg:grid-cols-2 grid-cols-1 gap-6 mt-6">
+                <CostSummary costs={project.master_costs} type="Master" />
+                <CostSummary costs={project.costs} type="Actual" />
+              </div>
+              <ComparisonSummary 
+                masterCosts={project.master_costs} 
+                actualCosts={project.costs}
+                nilai={project.nilai}
+              />
+            </>
+          );
+        default: // 'actual'
+          return (
+            <>
+              {getTables(project.costs).map((table, index) => (
+                <CostTable key={index} {...table} />
+              ))}
+              <CostSummary costs={project.costs} type="Actual" />
+            </>
+          );
+      }
+    };
   
-    const tables = [
+    const getTables = (costs: any, prefix: string = '') => [
       {
-        title: 'Material List',
-        data: project.costs?.material_list ?? [],
+        title: `${prefix} Material List`,
+        data: costs?.material_list ?? [],
         getItemName: (item: any) => item?.material?.name ?? 'N/A',
         getItemRate: (item: any) => item?.material?.unit_cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.material?.unit_cost ?? 0) * (item?.amount ?? 0)
       },
       {
-        title: 'Manpower List',
-        data: project.costs?.manpower_list ?? [],
+        title: `${prefix} Manpower List`,
+        data: costs?.manpower_list ?? [],
         getItemName: (item: any) => item?.manpower?.name ?? 'N/A',
         getItemRate: (item: any) => item?.manpower?.unit_cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.manpower?.unit_cost ?? 0) * (item?.amount ?? 0)
       },
       {
-        title: 'Machine List',
-        data: project.costs?.machine_list ?? [],
+        title: `${prefix} Machine List`,
+        data: costs?.machine_list ?? [],
         getItemName: (item: any) => item?.machine?.name ?? 'N/A',
         getItemRate: (item: any) => item?.machine?.unit_cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.machine?.unit_cost ?? 0) * (item?.amount ?? 0)
       },
       {
-        title: 'Misc List',
-        data: project.costs?.other_description ?? [],
+        title: `${prefix} Misc List`,
+        data: costs?.other_description ?? [],
         getItemName: (item: any) => item?.description ?? 'N/A',
         getItemRate: (item: any) => item?.cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
@@ -433,7 +606,7 @@ const formatDescription = (desc: string) => {
         <div className="flex items-center lg:justify-end justify-center flex-wrap gap-4 mb-6">
           <button 
             type="button" 
-            onClick={() => navigate(`/`)} 
+            onClick={() => navigate(`/projects`)} 
             className="btn btn-outline-danger"
           >
             <IconX className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
@@ -546,11 +719,25 @@ const formatDescription = (desc: string) => {
           </div>
         </div>
 
-        {tables.map((table, index) => (
-          <CostTable key={index} {...table} />
-        ))}
+        { userCanSeeMaster && (
+        <div className="flex justify-center border rounded-lg overflow-hidden w-full md:w-fit mx-auto my-6">
+          {['actual', 'master', 'all'].map((option) => (
+            <button
+              key={option}
+              className={`
+                ${baseSegmentStyle}
+                ${view === option ? activeSegmentStyle : inactiveSegmentStyle}
+                flex-1 md:flex-none
+              `}
+              onClick={() => setView(option)}
+            >
+              {option.charAt(0).toUpperCase() + option.slice(1)}
+            </button>
+          ))}
+        </div>
+        )}
 
-        <CostSummary costs={project.costs} />
+        {renderCostContent()}
       </div>
     </div>
   );

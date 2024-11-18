@@ -234,7 +234,59 @@ const getProjById2 = async (req, res) => {
                       },
                       other_cost: "$costs.other_cost",
                       other_description: "$costs.other_description"
-                  }
+                  },
+                  master_costs: {
+                    material_cost: "$master_costs.material_cost",
+                    material_list: {
+                        $map: {
+                            input: "$master_costs.material_list",
+                            as: "item",
+                            in: {
+                                material: {
+                                    _id: "$$item.material._id",
+                                    name: "$$item.material.name",
+                                    unit_cost: "$$item.material.unit_cost",
+                                    stock: "$$item.material.stock"
+                                },
+                                amount: "$$item.amount"
+                            }
+                        }
+                    },
+                    manpower_cost: "$master_costs.manpower_cost",
+                    manpower_list: {
+                        $map: {
+                            input: "$master_costs.manpower_list",
+                            as: "item",
+                            in: {
+                                manpower: {
+                                    _id: "$$item.manpower._id",
+                                    name: "$$item.manpower.name",
+                                    unit_cost: "$$item.manpower.unit_cost",
+                                    stock: "$$item.manpower.stock"
+                                },
+                                amount: "$$item.amount"
+                            }
+                        }
+                    },
+                    machine_cost: "$master_costs.machine_cost",
+                    machine_list: {
+                        $map: {
+                            input: "$master_costs.machine_list",
+                            as: "item",
+                            in: {
+                                machine: {
+                                    _id: "$$item.machine._id",
+                                    name: "$$item.machine.name",
+                                    unit_cost: "$$item.machine.unit_cost",
+                                    stock: "$$item.machine.stock"
+                                },
+                                amount: "$$item.amount"
+                            }
+                        }
+                    },
+                    other_cost: "$master_costs.other_cost",
+                    other_description: "$master_costs.other_description"
+                }
               }
           }
       ]);
@@ -370,7 +422,7 @@ const updateProject = async (req, res) => {
         }
 
         // Extract fields from request body
-        const { no_project, start_date, end_date, costs, desc, project_status } = req.body;
+        const { no_project, start_date, end_date, costs, desc, project_status, master_costs } = req.body;
 
         // Update only the specified fields, initialize them if they don't exist
         if (no_project) project.no_project = no_project;
@@ -379,6 +431,7 @@ const updateProject = async (req, res) => {
         if (costs) project.costs = costs;
         if (desc) project.desc = desc;
         if (project_status) project.project_status = project_status;
+        if (master_costs) project.master_costs = master_costs;
 
         // Save updated project
         await project.save();
