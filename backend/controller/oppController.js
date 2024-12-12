@@ -201,9 +201,9 @@ const handoverOpp = async (req, res) => {
         return res.status(400).json({ error: "ID not found / Incorrect ID"})
     }
 
-    const {
-        master_costs
-    } = req.body;
+    // const {
+    //     master_costs
+    // } = req.body;
 
     // Check if data exists
     const opp = await Opp.findById(req.params.id)
@@ -211,10 +211,10 @@ const handoverOpp = async (req, res) => {
         return res.status(400).json({ error: "OPP not found"})
     }
 
-    if(!master_costs)
-    {
-        return res.status(400).json({ error: "Master Costs not found"})
-    }
+    // if(!master_costs)
+    // {
+    //     return res.status(400).json({ error: "Master Costs not found"})
+    // }
 
     try {
         await opp.updateOne({ handover_status : "Finished" })
@@ -226,7 +226,7 @@ const handoverOpp = async (req, res) => {
             nilai: opp.nilai,
             gm: opp.gm,
             deleted: false,
-            master_costs
+            //master_costs
          })
         return res.status(200).json({ success: "OPP Handed Over", opp, project})
     } catch(error) {

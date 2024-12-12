@@ -51,6 +51,18 @@ const CostSchema = new mongoose.Schema({
             type: Number,
         }
     }],
+    subcontractor_cost: {
+        type: Number,
+        required: true
+    },
+    subcontractor_list: [{
+        machine:{
+            type: CostDetailSchema
+        },
+        amount:{
+            type: Number,
+        }
+    }],
     other_cost: {
         type: Number,
         required: false
@@ -168,6 +180,7 @@ const ProjectSchema = new mongoose.Schema({
     },
     costs: CostSchema,
     master_costs: CostSchema,
+    invoice: CostSchema,
     desc: {
         type: String,
         required: false
