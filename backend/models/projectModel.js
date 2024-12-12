@@ -14,8 +14,7 @@ const CostDetailSchema = new mongoose.Schema({
 // Define the Cost schema
 const CostSchema = new mongoose.Schema({
     material_cost: {
-        type: Number,
-        required: true
+        type: Number
     },
     material_list: [{
         material:{
@@ -27,8 +26,7 @@ const CostSchema = new mongoose.Schema({
         }
     }],
     manpower_cost: {
-        type: Number,
-        required: true
+        type: Number
     },
     manpower_list: [{
         manpower:{
@@ -40,8 +38,7 @@ const CostSchema = new mongoose.Schema({
         }
     }],
     machine_cost: {
-        type: Number,
-        required: true
+        type: Number
     },
     machine_list: [{
         machine:{
@@ -52,11 +49,10 @@ const CostSchema = new mongoose.Schema({
         }
     }],
     subcontractor_cost: {
-        type: Number,
-        required: true
+        type: Number
     },
     subcontractor_list: [{
-        machine:{
+        subcontractor:{
             type: CostDetailSchema
         },
         amount:{
@@ -64,8 +60,7 @@ const CostSchema = new mongoose.Schema({
         }
     }],
     other_cost: {
-        type: Number,
-        required: false
+        type: Number
     },
     other_description: {
         type: [

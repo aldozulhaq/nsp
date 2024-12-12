@@ -31,6 +31,10 @@ interface Material {
   interface Machine {
     name: string;
   }
+
+  interface Subcontractor {
+    name: string;
+  }
   
   interface ProjectCosts {
     material_list: {
@@ -45,9 +49,14 @@ interface Material {
       machine: Machine;
       amount: number;
     }[];
+    subcontractor_list: {
+      subcontractor: Subcontractor;
+      amount: number;
+    }[];
     material_cost: number;
     manpower_cost: number;
     machine_cost: number;
+    subcontractor_cost: number;
     other_description: {
         description: String,
         cost: number,
@@ -68,6 +77,7 @@ interface Material {
     end_date: string;
     costs: ProjectCosts;
     master_costs: ProjectCosts;
+    invoice: ProjectCosts;
     customer_name: CustomerDetails,
     project_name: string,
     nilai: number
@@ -202,7 +212,8 @@ interface Material {
       { label: 'Total Material Cost', value: costs?.material_cost ?? 0 },
       { label: 'Total Manpower Cost', value: costs?.manpower_cost ?? 0 },
       { label: 'Total Machine Cost', value: costs?.machine_cost ?? 0 },
-      { label: 'Total Misc Cost', value: costs?.other_cost ?? 0 }
+      { label: 'Total Misc Cost', value: costs?.other_cost ?? 0 },
+      { label: 'Total Subcontractor Cost', value: costs?.subcontractor_cost ?? 0 },
     ];
   
     const totalCost = costItems.reduce((sum, item) => sum + item.value, 0);
@@ -279,63 +290,57 @@ interface Material {
     );
   };
 
-  const ComparisonSummary = ({ masterCosts, actualCosts, nilai }:any) => {
+  const ComparisonSummary = ({ masterCosts, actualCosts, invoiceCosts, nilai }:any) => {
     const getTotalCost = (costs:any) => {
-      return (
-        (costs?.material_cost ?? 0) +
-        (costs?.manpower_cost ?? 0) +
-        (costs?.machine_cost ?? 0) +
-        (costs?.other_cost ?? 0)
-      );
+        return (
+            (costs?.material_cost ?? 0) +
+            (costs?.manpower_cost ?? 0) +
+            (costs?.machine_cost ?? 0) +
+            (costs?.other_cost ?? 0) +
+            (costs?.subcontractor_cost ?? 0)
+        );
     };
-  
+
     const masterTotal = getTotalCost(masterCosts);
     const actualTotal = getTotalCost(actualCosts);
-    const difference = actualTotal - masterTotal;
-    const percentageDiff = ((difference / masterTotal) * 100).toFixed(1);
-  
-    const masterGrossMargin = nilai - masterTotal;
-    const actualGrossMargin = nilai - actualTotal;
-    const masterGrossMarginPercentage = ((masterGrossMargin / nilai) * 100).toFixed(1);
-    const actualGrossMarginPercentage = ((actualGrossMargin / nilai) * 100).toFixed(1);
-  
+    const invoiceTotal = getTotalCost(invoiceCosts);
+    const masterToActualDiff = actualTotal - masterTotal;
+    const masterToInvoiceDiff = invoiceTotal - masterTotal;
+
+    const percentageMasterToActual = ((masterToActualDiff / masterTotal) * 100).toFixed(1);
+    const percentageMasterToInvoice = ((masterToInvoiceDiff / masterTotal) * 100).toFixed(1);
+
     return (
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm mt-6">
-        <h3 className="text-xl font-bold mb-4">Cost Comparison Summary</h3>
-        
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-sm text-gray-500 mb-1">As Sold Total</div>
-            <div className="text-lg font-bold">{masterTotal.toLocaleString('id-ID')}</div>
-          </div>
-          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-sm text-gray-500 mb-1">Actual Total</div>
-            <div className="text-lg font-bold">{actualTotal.toLocaleString('id-ID')}</div>
-          </div>
-          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-sm text-gray-500 mb-1">Difference</div>
-            <div className={`text-lg font-bold ${difference > 0 ? 'text-red-500' : 'text-green-500'}`}>
-              {difference.toLocaleString('id-ID')} ({difference > 0 ? '+' : ''}{percentageDiff}%)
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm mt-6">
+            <h3 className="text-xl font-bold mb-4">Cost Comparison Summary</h3>
+            
+            <div className="grid grid-cols-4 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-sm text-gray-500 mb-1">As Sold Total</div>
+                    <div className="text-lg font-bold">{masterTotal.toLocaleString('id-ID')}</div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-sm text-gray-500 mb-1">Actual Total</div>
+                    <div className="text-lg font-bold">{actualTotal.toLocaleString('id-ID')}</div>
+                    <div className={`text-sm ${masterToActualDiff > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                        {masterToActualDiff.toLocaleString('id-ID')} ({masterToActualDiff > 0 ? '+' : ''}{percentageMasterToActual}%)
+                    </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-sm text-gray-500 mb-1">Invoice Total</div>
+                    <div className="text-lg font-bold">{invoiceTotal.toLocaleString('id-ID')}</div>
+                    <div className={`text-sm ${masterToInvoiceDiff > 0 ? 'text-red-500' : 'text-green-500'}`}>
+                        {masterToInvoiceDiff.toLocaleString('id-ID')} ({masterToInvoiceDiff > 0 ? '+' : ''}{percentageMasterToInvoice}%)
+                    </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-sm text-gray-500 mb-1">Project Value</div>
+                    <div className="text-lg font-bold">{nilai.toLocaleString('id-ID')}</div>
+                </div>
             </div>
-          </div>
         </div>
-  
-        {/* <h3 className="text-xl font-bold mb-4">Gross Margin Comparison</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-sm text-gray-500 mb-2">Master Gross Margin</div>
-            <div className="text-lg font-bold">{masterGrossMargin.toLocaleString('id-ID')}</div>
-            <div className="text-sm font-medium">{masterGrossMarginPercentage}%</div>
-          </div>
-          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-            <div className="text-sm text-gray-500 mb-2">Actual Gross Margin</div>
-            <div className="text-lg font-bold">{actualGrossMargin.toLocaleString('id-ID')}</div>
-            <div className="text-sm font-medium">{actualGrossMarginPercentage}%</div>
-          </div>
-        </div> */}
-      </div>
     );
-  };
+};
   
   const ProjectDetail = () => {
 
@@ -391,7 +396,8 @@ interface Material {
           (costs?.material_cost ?? 0) +
           (costs?.manpower_cost ?? 0) +
           (costs?.machine_cost ?? 0) +
-          (costs?.other_cost ?? 0)
+          (costs?.other_cost ?? 0) +
+          (costs?.subcontractor_cost ?? 0)
         );
     };
   
@@ -399,56 +405,75 @@ interface Material {
 
     const renderCostContent = () => {
       switch (view) {
-        case 'master':
-          return (
-            <>
-              {getTables(project.master_costs).map((table, index) => (
-                <CostTable key={index} {...table} />
-              ))}
-              <CostSummary costs={project.master_costs} type="Master" />
-            </>
-          );
-        case 'all':
-          return (
-            <>
-              <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
-                <div className="space-y-6">
-                  <h2 className="text-xl font-bold">As Sold Costs</h2>
-                  <div className="lg:min-h-[600px]">
-                    {getTables(project.master_costs, 'Master').map((table, index) => (
-                      <CostTable key={index} {...table} />
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-6">
-                  <h2 className="text-xl font-bold">Actual Costs</h2>
-                  <div className="lg:min-h-[600px]">
-                    {getTables(project.costs, 'Actual').map((table, index) => (
-                      <CostTable key={index} {...table} />
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="grid lg:grid-cols-2 grid-cols-1 gap-6 mt-6">
-                <CostSummary costs={project.master_costs} type="Master" />
-                <CostSummary costs={project.costs} type="Actual" />
-              </div>
-              <ComparisonSummary 
-                masterCosts={project.master_costs} 
-                actualCosts={project.costs}
-                nilai={project.nilai}
-              />
-            </>
-          );
-        default: // 'actual'
-          return (
-            <>
-              {getTables(project.costs).map((table, index) => (
-                <CostTable key={index} {...table} />
-              ))}
-              <CostSummary costs={project.costs} type="Actual" />
-            </>
-          );
+          case 'master':
+              return (
+                  <>
+                      {getTables(project.master_costs).map((table, index) => (
+                          <CostTable key={index} {...table} />
+                      ))}
+                      <CostSummary costs={project.master_costs} type="Master" />
+                  </>
+              );
+          case 'invoice':
+              return (
+                  <>
+                      {getTables(project.invoice).map((table, index) => (
+                          <CostTable key={index} {...table} />
+                      ))}
+                      <CostSummary costs={project.invoice} type="Invoice" />
+                  </>
+              );
+          case 'all':
+              return (
+                  <>
+                      <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
+                          <div className="space-y-6">
+                              <h2 className="text-xl font-bold">As Sold Costs</h2>
+                              <div className="lg:min-h-[600px]">
+                                  {getTables(project.master_costs, 'Master').map((table, index) => (
+                                      <CostTable key={index} {...table} />
+                                  ))}
+                              </div>
+                          </div>
+                          <div className="space-y-6">
+                              <h2 className="text-xl font-bold">Actual Costs</h2>
+                              <div className="lg:min-h-[600px]">
+                                  {getTables(project.costs, 'Actual').map((table, index) => (
+                                      <CostTable key={index} {...table} />
+                                  ))}
+                              </div>
+                          </div>
+                          <div className="space-y-6">
+                              <h2 className="text-xl font-bold">Invoice Costs</h2>
+                              <div className="lg:min-h-[600px]">
+                                  {getTables(project.invoice, 'Invoice').map((table, index) => (
+                                      <CostTable key={index} {...table} />
+                                  ))}
+                              </div>
+                          </div>
+                      </div>
+                      <div className="grid lg:grid-cols-3 grid-cols-1 gap-6 mt-6">
+                          <CostSummary costs={project.master_costs} type="Master" />
+                          <CostSummary costs={project.costs} type="Actual" />
+                          <CostSummary costs={project.invoice} type="Invoice" />
+                      </div>
+                      <ComparisonSummary 
+                          masterCosts={project.master_costs} 
+                          actualCosts={project.costs}
+                          invoiceCosts={project.invoice}  // New parameter
+                          nilai={project.nilai}
+                      />
+                  </>
+              );
+          default: // 'actual'
+              return (
+                  <>
+                      {getTables(project.costs).map((table, index) => (
+                          <CostTable key={index} {...table} />
+                      ))}
+                      <CostSummary costs={project.costs} type="Actual" />
+                  </>
+              );
       }
     };
   
@@ -484,6 +509,14 @@ interface Material {
         getItemRate: (item: any) => item?.cost ?? 0,
         getItemAmount: (item: any) => item?.amount ?? 0,
         getItemCost: (item: any) => (item?.cost ?? 0) * (item?.amount ?? 0)
+      },
+      {
+        title: `${prefix} Subcontractor List`,
+        data: costs?.subcontractor_list ?? [],
+        getItemName: (item: any) => item?.subcontractor?.name ?? 'N/A',
+        getItemRate: (item: any) => item?.subcontractor?.unit_cost ?? 0,
+        getItemAmount: (item: any) => item?.amount ?? 0,
+        getItemCost: (item: any) => (item?.subcontractor?.unit_cost ?? 0) * (item?.amount ?? 0)
       }
     ];
 
@@ -741,6 +774,7 @@ const formatDescription = (desc: string) => {
                 data={[
                   { label: 'As Sold', value: 'master' },
                   { label: 'Actual', value: 'actual' },
+                  { label: 'Invoice', value: 'invoice'},
                   { label: 'All', value: 'all' }
                 ]}
                 className="mb-4"

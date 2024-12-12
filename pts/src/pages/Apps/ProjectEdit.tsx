@@ -50,6 +50,16 @@ interface MachineItem {
   amount: number;
 }
 
+interface SubcontractorItem {
+  subcontractor: {
+    _id: string;
+    name: string;
+    unit_cost: number;
+    stock: number;
+  };
+  amount: number;
+}
+
 interface OtherItem {
   description: string;
   cost: number;
@@ -65,6 +75,8 @@ interface ProjectCosts {
   machine_list: MachineItem[];
   other_cost: number;
   other_description: OtherItem[];
+  subcontractor_list: SubcontractorItem[];
+  subcontractor_cost: number;
 }
 
 interface CustomerDetails {
@@ -79,6 +91,7 @@ interface Project {
   nilai?: number;
   costs?: ProjectCosts;
   master_costs?: ProjectCosts;
+  invoice?: ProjectCosts;
   customer_name: CustomerDetails;
   project_name: string;
   project_status: string;
@@ -93,6 +106,7 @@ interface FormData {
   project_status: string;
   desc: string;
   master_costs: ProjectCosts;
+  invoice: ProjectCosts;
 }
 
 interface CostRatioIndicatorProps {
@@ -109,7 +123,7 @@ interface CostTableProps {
   readOnlyTotal?: boolean;
 }
 
-type CostView = 'master' | 'actual';
+type CostView = 'master' | 'actual' | 'invoice';
 
 const CostRatioIndicator: React.FC<CostRatioIndicatorProps> = ({ nilai, totalCost }) => {
   const ratio = nilai ? (totalCost / nilai) * 100 : 0;
@@ -352,6 +366,8 @@ const ProjectEdit: React.FC = () => {
         machine_list: [],
         other_cost: 0,
         other_description: [],
+        subcontractor_cost: 0,
+        subcontractor_list: [],
       },
       project_status: '',
       desc: '',
@@ -364,6 +380,20 @@ const ProjectEdit: React.FC = () => {
         machine_list: [],
         other_cost: 0,
         other_description: [],
+        subcontractor_cost: 0,
+        subcontractor_list: [],
+      },
+      invoice: {
+        material_cost: 0,
+        material_list: [],
+        manpower_cost: 0,
+        manpower_list: [],
+        machine_cost: 0,
+        machine_list: [],
+        other_cost: 0,
+        other_description: [],
+        subcontractor_cost: 0,
+        subcontractor_list: [],
       },
     });
 
@@ -401,6 +431,8 @@ const ProjectEdit: React.FC = () => {
             machine_list: [],
             other_cost: 0,
             other_description: [],
+            subcontractor_cost: 0,
+            subcontractor_list: [],
           },
           project_status: response.project.project_status || '',
           desc: response.project.desc || '',
@@ -413,6 +445,20 @@ const ProjectEdit: React.FC = () => {
             machine_list: [],
             other_cost: 0,
             other_description: [],
+            subcontractor_cost: 0,
+            subcontractor_list: [],
+          },
+          invoice: response.project.invoice || {
+            material_cost: 0,
+            material_list: [],
+            manpower_cost: 0,
+            manpower_list: [],
+            machine_cost: 0,
+            machine_list: [],
+            other_cost: 0,
+            other_description: [],
+            subcontractor_cost: 0,
+            subcontractor_list: [],
           },
         });
         setIsLoading(false);
@@ -426,23 +472,33 @@ const ProjectEdit: React.FC = () => {
       calculateCosts();
     }, [
       costView,
-      formData.costs.material_list,
-      formData.costs.manpower_list,
-      formData.costs.machine_list,
-      formData.costs.other_description,
+      formData.costs?.material_list,
+      formData.costs?.manpower_list,
+      formData.costs?.machine_list,
+      formData.costs?.other_description,
+      formData.costs?.subcontractor_list,
       formData.master_costs?.material_list,
       formData.master_costs?.manpower_list,
       formData.master_costs?.machine_list,
-      formData.master_costs?.other_description
+      formData.master_costs?.other_description,
+      formData.master_costs?.subcontractor_list,
+      formData.invoice?.material_list,
+      formData.invoice?.manpower_list,
+      formData.invoice?.machine_list,
+      formData.invoice?.other_description,
+      formData.invoice?.subcontractor_list,
     ]);
 
     useEffect(() => {
-      const costs = costView === 'master' ? formData.master_costs : formData.costs;
+      const costs = costView === 'master' ? formData.master_costs :
+                    costView === 'invoice' ? formData.invoice :
+                    formData.costs;
       const total = (
         costs?.material_cost +
         costs?.manpower_cost +
         costs?.machine_cost +
-        costs?.other_cost
+        costs?.other_cost +
+        costs?.subcontractor_cost
       ) || 0;
       setTotalCost(total);
     }, [
@@ -451,14 +507,23 @@ const ProjectEdit: React.FC = () => {
       formData.costs.manpower_cost,
       formData.costs.machine_cost,
       formData.costs.other_cost,
+      formData.costs.subcontractor_cost,
       formData.master_costs?.material_list,
       formData.master_costs?.manpower_list,
       formData.master_costs?.machine_list,
-      formData.master_costs?.other_description
+      formData.master_costs?.other_description,
+      formData.master_costs?.subcontractor_cost,
+      formData.invoice?.material_list,
+      formData.invoice?.manpower_list,
+      formData.invoice?.machine_list,
+      formData.invoice?.other_description,
+      formData.invoice?.subcontractor_cost
     ]);
   
     const calculateCosts = () => {
-      const costs = costView === 'master' ? formData.master_costs : formData.costs;
+      const costs = costView === 'master' ? formData.master_costs :
+                    costView === 'invoice' ? formData.invoice :
+                    formData.costs;
 
       const materialCost = costs.material_list?.reduce((total, item) => 
         total + (item?.amount * (item.material.unit_cost || 0)), 0) ?? 0;
@@ -468,15 +533,18 @@ const ProjectEdit: React.FC = () => {
         total + (item?.amount * (item.machine.unit_cost || 0)), 0) ?? 0;
       const otherCost = costs.other_description?.reduce((total, item) => 
         total + (item?.cost * item.amount), 0) ?? 0;
+      const subcontractorCost = costs.subcontractor_list?.reduce((total, item) =>
+        total + (item?.amount * (item.subcontractor.unit_cost || 0)), 0) ?? 0;
   
       setFormData((prev) => ({
         ...prev,
-        [costView === 'master' ? 'master_costs' : 'costs']: {
-          ...(costView === 'master' ? prev.master_costs : prev.costs),
+        [costView === 'master' ? 'master_costs' : costView === 'invoice' ? 'invoice' : 'costs']: {
+          ...(costView === 'master' ? prev.master_costs : costView === 'invoice' ? prev.invoice : prev.costs),
           material_cost: materialCost,
           manpower_cost: manpowerCost,
           machine_cost: machineCost,
           other_cost: otherCost,
+          subcontractor_cost: subcontractorCost,
         },
       }));
     };
@@ -486,7 +554,8 @@ const ProjectEdit: React.FC = () => {
         formData.costs.material_cost +
         formData.costs.manpower_cost +
         formData.costs.machine_cost +
-        formData.costs.other_cost
+        formData.costs.other_cost +
+        formData.costs.subcontractor_cost
       );
     };
   
@@ -494,7 +563,7 @@ const ProjectEdit: React.FC = () => {
       e.preventDefault();
       const totalCost = calculateTotalCost();
     
-      console.log(formData)
+      //console.log(formData)
       try {
         await updateProject(id as string, formData);
         navigate(`/projects/${id}`);
@@ -637,6 +706,7 @@ const ProjectEdit: React.FC = () => {
                 data={[
                   { label: 'As Sold', value: 'master' },
                   { label: 'Actual', value: 'actual' },
+                  { label: 'Invoice', value: 'invoice' },
                 ]}
                 className="mb-4"
               />
@@ -645,12 +715,21 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Material List"
-              items={costView === 'master' ? formData.master_costs.material_list : formData.costs.material_list}
+              items={
+                costView === 'master' ? formData.master_costs.material_list :
+                costView === 'invoice' ? formData.invoice.material_list :
+                formData.costs.material_list
+              }
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  [costView === 'master' ? 'master_costs' : 'costs']: { 
-                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
+                  [costView === 'master' ? 'master_costs' : 
+                   costView === 'invoice' ? 'invoice' : 'costs']: { 
+                    ...(
+                      costView === 'master' ? formData.master_costs :
+                      costView === 'invoice' ? formData.invoice :
+                      formData.costs
+                    ), 
                     material_list: items 
                   }
                 })
@@ -661,12 +740,21 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Manpower List"
-              items={costView === 'master' ? formData.master_costs.manpower_list : formData.costs.manpower_list}
+              items={
+                costView === 'master' ? formData.master_costs.manpower_list :
+                costView === 'invoice' ? formData.invoice.manpower_list :
+                formData.costs.manpower_list
+              }
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  [costView === 'master' ? 'master_costs' : 'costs']: { 
-                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
+                  [costView === 'master' ? 'master_costs' : 
+                   costView === 'invoice' ? 'invoice' : 'costs']: { 
+                    ...(
+                      costView === 'master' ? formData.master_costs :
+                      costView === 'invoice' ? formData.invoice :
+                      formData.costs
+                    ), 
                     manpower_list: items 
                   }
                 })
@@ -677,12 +765,21 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Machine List"
-              items={costView === 'master' ? formData.master_costs.machine_list : formData.costs.machine_list}
+              items={
+                costView === 'master' ? formData.master_costs.machine_list :
+                costView === 'invoice' ? formData.invoice.machine_list :
+                formData.costs.machine_list
+              }
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  [costView === 'master' ? 'master_costs' : 'costs']: { 
-                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
+                  [costView === 'master' ? 'master_costs' : 
+                   costView === 'invoice' ? 'invoice' : 'costs']: { 
+                    ...(
+                      costView === 'master' ? formData.master_costs :
+                      costView === 'invoice' ? formData.invoice :
+                      formData.costs
+                    ), 
                     machine_list: items 
                   }
                 })
@@ -693,17 +790,51 @@ const ProjectEdit: React.FC = () => {
   
             <CostTable
               title="Misc List"
-              items={costView === 'master' ? formData.master_costs.other_description : formData.costs.other_description}
+              items={
+                costView === 'master' ? formData.master_costs.other_description :
+                costView === 'invoice' ? formData.invoice.other_description :
+                formData.costs.other_description
+              }
               onItemsChange={(items) => 
                 setFormData({ 
                   ...formData, 
-                  [costView === 'master' ? 'master_costs' : 'costs']: { 
-                    ...(costView === 'master' ? formData.master_costs : formData.costs), 
+                  [costView === 'master' ? 'master_costs' : 
+                   costView === 'invoice' ? 'invoice' : 'costs']: { 
+                    ...(
+                      costView === 'master' ? formData.master_costs :
+                      costView === 'invoice' ? formData.invoice :
+                      formData.costs
+                    ), 
                     other_description: items 
                   }
                 })
               }
               itemType="description"
+              calculateCosts={calculateCosts}
+            />
+
+            <CostTable
+              title="Subcontractor List"
+              items={
+                costView === 'master' ? formData.master_costs.subcontractor_list :
+                costView === 'invoice' ? formData.invoice.subcontractor_list :
+                formData.costs.subcontractor_list
+              }
+              onItemsChange={(items) => 
+                setFormData({ 
+                  ...formData, 
+                  [costView === 'master' ? 'master_costs' : 
+                   costView === 'invoice' ? 'invoice' : 'costs']: { 
+                    ...(
+                      costView === 'master' ? formData.master_costs :
+                      costView === 'invoice' ? formData.invoice :
+                      formData.costs
+                    ), 
+                    subcontractor_list: items 
+                  }
+                })
+              }
+              itemType="subcontractor"
               calculateCosts={calculateCosts}
             />
           </div>

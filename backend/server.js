@@ -25,7 +25,7 @@ app.use('/api/project', projectRoutes)
 //process.env.DB_URI
 //"mongodb://localhost:27017/"
 
-mongoose.connect(process.env.DB_URI, { dbName: 'OTP_DB' })
+mongoose.connect("mongodb://localhost:27017/", { dbName: 'OTP_DB' })
     .then( () => {
         console.log("Connected to DB successfully")
         app.listen(4000, ()=>console.log("Listening to port 4000"))

@@ -232,6 +232,22 @@ const getProjById2 = async (req, res) => {
                               }
                           }
                       },
+                      subcontractor_cost: "$costs.subcontractor_cost",
+                      subcontractor_list: {
+                          $map: {
+                              input: "$costs.subcontractor_list",
+                              as: "item",
+                              in: {
+                                  subcontractor: {
+                                      _id: "$$item.subcontractor._id",
+                                      name: "$$item.subcontractor.name",
+                                      unit_cost: "$$item.subcontractor.unit_cost",
+                                      stock: "$$item.subcontractor.stock"
+                                  },
+                                  amount: "$$item.amount"
+                              }
+                          }
+                      },
                       other_cost: "$costs.other_cost",
                       other_description: "$costs.other_description"
                   },
@@ -284,9 +300,93 @@ const getProjById2 = async (req, res) => {
                             }
                         }
                     },
+                    subcontractor_cost: "$master_costs.subcontractor_cost",
+                      subcontractor_list: {
+                          $map: {
+                              input: "$master_costs.subcontractor_list",
+                              as: "item",
+                              in: {
+                                  subcontractor: {
+                                      _id: "$$item.subcontractor._id",
+                                      name: "$$item.subcontractor.name",
+                                      unit_cost: "$$item.subcontractor.unit_cost",
+                                      stock: "$$item.subcontractor.stock"
+                                  },
+                                  amount: "$$item.amount"
+                              }
+                          }
+                      },
                     other_cost: "$master_costs.other_cost",
                     other_description: "$master_costs.other_description"
-                }
+                  },
+                  invoice: {
+                    material_cost: "$invoice.material_cost",
+                    material_list: {
+                        $map: {
+                            input: "$invoice.material_list",
+                            as: "item",
+                            in: {
+                                material: {
+                                    _id: "$$item.material._id",
+                                    name: "$$item.material.name",
+                                    unit_cost: "$$item.material.unit_cost",
+                                    stock: "$$item.material.stock"
+                                },
+                                amount: "$$item.amount"
+                            }
+                        }
+                    },
+                    manpower_cost: "$invoice.manpower_cost",
+                    manpower_list: {
+                        $map: {
+                            input: "$invoice.manpower_list",
+                            as: "item",
+                            in: {
+                                manpower: {
+                                    _id: "$$item.manpower._id",
+                                    name: "$$item.manpower.name",
+                                    unit_cost: "$$item.manpower.unit_cost",
+                                    stock: "$$item.manpower.stock"
+                                },
+                                amount: "$$item.amount"
+                            }
+                        }
+                    },
+                    machine_cost: "$invoice.machine_cost",
+                    machine_list: {
+                        $map: {
+                            input: "$invoice.machine_list",
+                            as: "item",
+                            in: {
+                                machine: {
+                                    _id: "$$item.machine._id",
+                                    name: "$$item.machine.name",
+                                    unit_cost: "$$item.machine.unit_cost",
+                                    stock: "$$item.machine.stock"
+                                },
+                                amount: "$$item.amount"
+                            }
+                        }
+                    },
+                    subcontractor_cost: "$invoice.subcontractor_cost",
+                      subcontractor_list: {
+                          $map: {
+                              input: "$invoice.subcontractor_list",
+                              as: "item",
+                              in: {
+                                  subcontractor: {
+                                      _id: "$$item.subcontractor._id",
+                                      name: "$$item.subcontractor.name",
+                                      unit_cost: "$$item.subcontractor.unit_cost",
+                                      stock: "$$item.subcontractor.stock"
+                                  },
+                                  amount: "$$item.amount"
+                              }
+                          }
+                      },
+                    other_cost: "$invoice.other_cost",
+                    other_description: "$invoice.other_description"
+                  }
               }
           }
       ]);
@@ -422,7 +522,7 @@ const updateProject = async (req, res) => {
         }
 
         // Extract fields from request body
-        const { no_project, start_date, end_date, costs, desc, project_status, master_costs } = req.body;
+        const { no_project, start_date, end_date, costs, desc, project_status, master_costs, invoice } = req.body;
 
         // Update only the specified fields, initialize them if they don't exist
         if (no_project) project.no_project = no_project;
@@ -432,6 +532,7 @@ const updateProject = async (req, res) => {
         if (desc) project.desc = desc;
         if (project_status) project.project_status = project_status;
         if (master_costs) project.master_costs = master_costs;
+        if (invoice) project.invoice = invoice;
 
         // Save updated project
         await project.save();
