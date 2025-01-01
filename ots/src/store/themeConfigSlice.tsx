@@ -134,7 +134,7 @@ const themeConfigSlice = createSlice({
         },
 
         setPageTitle(state, { payload }) {
-            document.title = `${payload}`;
+            document.title = `OTS - ${payload}`;
         },
     },
 });

@@ -20,6 +20,8 @@ import Tippy from '@tippyjs/react';
 import Dropdown from '../../components/Dropdown';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
 import IconArchive from '../../components/Icon/IconArchive';
+import { saveAs } from 'file-saver';
+import ExcelJS from 'exceljs';
 
 interface Option {
     value: string;
@@ -29,7 +31,7 @@ interface Option {
 const Dashboard = () => {
     const dispatch = useDispatch();
     useEffect(() => {
-        dispatch(setPageTitle('Dashboard'));
+        dispatch(setPageTitle('Opportunity'));
     });
     const [addContactModal, setAddContactModal] = useState<any>(false);
 
@@ -567,6 +569,224 @@ const Dashboard = () => {
        }
    }
 
+const exportToExcel = async () => {
+    // Helper function to replace null or undefined with an empty string
+    function getValue(value:any) {
+        return value === null || value === undefined ? '' : value;
+    }
+  
+
+    // Create workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Opportunities', {
+      views: [{ state: 'frozen', xSplit: 0, ySplit: 1 }], // Freeze header row
+      properties: { tabColor: { argb: '4F81BD' } }
+    });
+  
+    // Define columns
+    worksheet.columns = [
+      { header: 'No', key: 'no', width: 5 },
+      { header: 'Opportunity No', key: 'no_opportunity', width: 20 },
+      { header: 'No Proposal', key: 'no_proposal', width: 29 },
+      { header: 'Customer Name', key: 'customer_name', width: 25 },
+      { header: 'Opportunity Name', key: 'opportunity_name', width: 65 },
+      { header: 'SIC', key: 'sic', width: 7 },
+      { header: 'Closing Date', key: 'closing_date', width: 15 },
+      { header: 'Firm/Budgetary', key: 'firm_budgetary', width: 17 },
+      { header: 'Opportunity Status', key: 'opp_status', width: 22 },
+      { header: 'Nilai', key: 'nilai', width: 24 },
+      { header: 'GM', key: 'gm', width: 10 },
+      { header: 'Probability', key: 'probability', width: 12 },
+      { header: 'Keterangan', key: 'keterangan', width: 50 },
+      { header: 'Handover Status', key: 'handover_status', width: 20}
+    ];
+  
+    // Status color mapping
+    const statusColors = {
+      'Identified': '7367F0',      // primary (blue)
+      'Offer in progress': '82868B', // secondary (gray)
+      'Offer Submitted': 'FF9F43',   // warning (orange)
+      'Decline': 'EA5455',          // danger (red)
+      'Lost': '4B4B4B',             // dark (dark gray)
+      'Won': '28C76F',              // success (green)
+      'Customer did not pursue': '4B4B4B' // dark (dark gray)
+    };
+  
+    // Add data
+    const rows = sortedOpps.map(opp => ({
+        no: getValue(opp.no),
+        no_opportunity: getValue(opp.no_opportunity),
+        no_proposal: getValue(opp.no_proposal),
+        customer_name: getValue(getCustomerByIdLocal(opp.customer_name).label),
+        opportunity_name: getValue(opp.opportunity_name),
+        sic: getValue(getSicByIdLocal(opp.sic).label),
+        closing_date: getValue(new Date(opp.closing_date)),
+        firm_budgetary: getValue(opp.firm_budgetary),
+        opp_status: getValue(opp.opp_status),
+        nilai: getValue(opp.nilai),
+        gm: getValue(opp.gm),
+        probability: getValue(opp.probability),
+        keterangan: getValue(opp.keterangan),
+        handover_status: getValue(opp.handover_status)
+      }));
+  
+    worksheet.addRows(rows);
+  
+    // Style the header row
+    const headerRow = worksheet.getRow(1);
+    headerRow.height = 25; // Taller header row
+    headerRow.font = {
+      name: 'Arial',
+      size: 11,
+      bold: true,
+      color: { argb: 'FFFFFF' }
+    };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: '4F81BD' }
+    };
+    headerRow.alignment = {
+      vertical: 'middle',
+      horizontal: 'center'
+    };
+  
+    // Apply styles to data rows
+    worksheet.eachRow((row, rowNumber) => {
+      // Skip header row
+      if (rowNumber === 1) return;
+  
+      // Set row height
+      // row.height = 20;
+  
+      row.eachCell((cell, colNumber) => {
+        // Common cell styling
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        cell.font = { name: 'Arial', size: 10 };
+        cell.border = {
+          top: { style: 'thin' },
+          bottom: { style: 'thin' },
+          left: { style: 'thin' },
+          right: { style: 'thin' }
+        };
+  
+        // Zebra striping without overriding status column color
+        if (colNumber !== 9) { // Skip status column
+            cell.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: rowNumber % 2 ? 'FFFFFF' : 'F5F5F5' }
+            };
+        }
+  
+        // Special formatting for Keterangan column (last column)
+        if (colNumber === 13) {
+          cell.alignment = {
+            vertical: 'middle',
+            horizontal: 'left',
+            wrapText: true
+          };
+        }
+
+        if (colNumber === 5) {
+            cell.alignment = {
+              vertical: 'middle',
+              horizontal: 'left',
+              wrapText: true
+            };
+          }
+  
+        // Status column color coding (column 9)
+        if (colNumber === 9) {
+          const status = cell.value as string;
+          const statusColor = statusColors[status];
+          if (statusColor) {
+            cell.fill = {
+              type: 'pattern',
+              pattern: 'solid',
+              fgColor: { argb: statusColor }
+            };
+            cell.font = {
+              name: 'Arial',
+              size: 10,
+              color: { argb: 'FFFFFF' } // White text for better contrast
+            };
+          }
+        }
+      });
+  
+      // Format specific columns
+      const nilaiCell = row.getCell(10);
+      nilaiCell.numFmt = '#,##0.00';
+      
+      const gmCell = row.getCell(11);
+      gmCell.numFmt = '0.00"%"';
+      
+      const probCell = row.getCell(12);
+      probCell.numFmt = '0.00"%"';
+      
+      const dateCell = row.getCell(7);
+      dateCell.numFmt = 'dd-mmm-yyyy';
+    });
+  
+    // Enable filters
+    worksheet.autoFilter = {
+      from: { row: 1, column: 1 },
+      to: { row: 1, column: worksheet.columns.length }
+    };
+  
+    // Add conditional formatting for GM and Probability
+    worksheet.addConditionalFormatting({
+      ref: `K2:K${worksheet.rowCount}`, // GM column
+      rules: [
+        {
+          type: 'colorScale',
+          priority: 1,
+          cfvo: [
+            { type: 'min' },
+            { type: 'max' }
+          ],
+          color: [
+            { argb: 'FFC7CE' },
+            { argb: '006100' }
+          ]
+        }
+      ]
+    });
+  
+    worksheet.addConditionalFormatting({
+      ref: `L2:L${worksheet.rowCount}`, // Probability column
+      rules: [
+        {
+          type: 'colorScale',
+          priority: 2,
+          cfvo: [
+            { type: 'min' },
+            { type: 'max' }
+          ],
+          color: [
+            { argb: 'FFC7CE' },
+            { argb: '006100' }
+          ]
+        }
+      ]
+    });
+  
+    // Set print area and options
+    worksheet.pageSetup = {
+      orientation: 'landscape',
+      fitToPage: true,
+      fitToWidth: 1,
+      fitToHeight: 0,
+      paperSize: 9, // A4
+      showGridLines: true
+    };
+  
+    // Generate buffer and trigger download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `opportunities_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
     return (
         <>
@@ -578,6 +798,11 @@ const Dashboard = () => {
                             <button type="button" className="btn btn-primary" onClick={() => {editUser(); setParams({...params, ["_id"]:null})}}>
                                 <IconUserPlus className="ltr:mr-2 rtl:ml-2" />
                                 Add Opportunity
+                            </button>
+                        </div>
+                        <div>
+                            <button type="button" className="btn btn-secondary" onClick={exportToExcel}>
+                                Export to Excel
                             </button>
                         </div>
                     </div>
