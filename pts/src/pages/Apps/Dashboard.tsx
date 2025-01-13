@@ -63,6 +63,19 @@ interface ProjectCosts {
     other_cost: number;
 }
 
+const formatCurrency = (value: number) => {
+  const abs = Math.abs(value);
+  if (abs >= 1000000000) { // Billion
+    return `${(value / 1000000000).toFixed(1)}B`;
+  } else if (abs >= 1000000) { // Million
+    return `${(value / 1000000).toFixed(1)}M`;
+  } else if (abs >= 1000) { // Thousand
+    return `${(value / 1000).toFixed(1)}K`;
+  } else {
+    return value.toFixed(0);
+  }
+};
+
 const getProjectStatusColor = (status: string) => {
     switch (status) {
         case 'preparation':
@@ -114,40 +127,106 @@ const ProjectLineChart = ({ projects }: { projects: Project[] }) => {
         const today = new Date();
         const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
         const endOfWeek = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate() + 6);
-        filtered = projects.filter(project => new Date(project.start_date) >= startOfWeek && new Date(project.start_date) <= endOfWeek);
+        filtered = projects.filter(project => {
+          const projectStartDate = new Date(project.start_date);
+          const projectEndDate = new Date(project.end_date);
+          const projectYear = project.no_project?.match(/Y(\d{4})/)?.[1];
+          
+          // Check if project duration overlaps with the week
+          return (
+            (projectStartDate <= endOfWeek && projectEndDate >= startOfWeek) ||
+            (projectYear && parseInt(projectYear) === today.getFullYear())
+          );
+        });
         break;
       }
       case 'this-month': {
-        const currentMonth = new Date().getMonth();
-        filtered = projects.filter(project => new Date(project.start_date).getMonth() === currentMonth);
+        const today = new Date();
+        const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        filtered = projects.filter(project => {
+          const projectStartDate = new Date(project.start_date);
+          const projectEndDate = new Date(project.end_date);
+          const projectYear = project.no_project?.match(/Y(\d{4})/)?.[1];
+          
+          return (
+            (projectStartDate <= endOfMonth && projectEndDate >= startOfMonth) ||
+            (projectYear && parseInt(projectYear) === today.getFullYear())
+          );
+        });
         break;
       }
       case 'this-year': {
         const currentYear = new Date().getFullYear();
-        filtered = projects.filter(project => new Date(project.start_date).getFullYear() === currentYear);
+        const startOfYear = new Date(currentYear, 0, 1);
+        const endOfYear = new Date(currentYear, 11, 31);
+        filtered = projects.filter(project => {
+          const projectStartDate = new Date(project.start_date);
+          const projectEndDate = new Date(project.end_date);
+          const projectYear = project.no_project?.match(/Y(\d{4})/)?.[1];
+          
+          return (
+            (projectStartDate <= endOfYear && projectEndDate >= startOfYear) ||
+            (projectYear && parseInt(projectYear) === currentYear)
+          );
+        });
         break;
       }
       case 'custom': {
         if (customDateRange.start && customDateRange.end) {
-          filtered = projects.filter(
-            project => 
-              new Date(project.start_date) >= new Date(customDateRange.start) && 
-              new Date(project.start_date) <= new Date(customDateRange.end)
-          );
+          const startDate = new Date(customDateRange.start);
+          const endDate = new Date(customDateRange.end);
+          filtered = projects.filter(project => {
+            const projectStartDate = new Date(project.start_date);
+            const projectEndDate = new Date(project.end_date);
+            const projectYear = project.no_project?.match(/Y(\d{4})/)?.[1];
+            
+            return (
+              (projectStartDate <= endDate && projectEndDate >= startDate) ||
+              (projectYear && parseInt(projectYear) === startDate.getFullYear())
+            );
+          });
         }
         break;
       }
     }
-    return filtered;
+
+    // Sort projects by start date
+    return filtered.sort((a, b) => {
+      const dateA = new Date(a.start_date);
+      const dateB = new Date(b.start_date);
+      return dateA.getTime() - dateB.getTime();
+    });
   }, [projects, filterType, customDateRange]);
 
   const getProjectsInRange = useCallback((startDate: string, endDate: string) => {
     if (!startDate || !endDate) return [];
-    return projects.filter(
-      project => 
-        new Date(project.start_date) >= new Date(startDate) && 
-        new Date(project.start_date) <= new Date(endDate)
-    );
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    const startYear = start.getFullYear();
+    const endYear = end.getFullYear();
+    
+    const filteredProjects = projects.filter(project => {
+      const projectStartDate = new Date(project.start_date);
+      const projectEndDate = new Date(project.end_date);
+      const projectYear = project.no_project?.match(/Y(\d{4})/)?.[1];
+      const numericProjectYear = projectYear ? parseInt(projectYear) : null;
+      
+      return (
+        (projectStartDate <= end && projectEndDate >= start) ||
+        (numericProjectYear !== null && 
+         numericProjectYear >= startYear && 
+         numericProjectYear <= endYear)
+      );
+    });
+
+    // Sort projects by start date
+    return filteredProjects.sort((a, b) => {
+      const dateA = new Date(a.start_date);
+      const dateB = new Date(b.start_date);
+      return dateA.getTime() - dateB.getTime();
+    });
   }, [projects]);
 
   const handleAddComparison = useCallback(() => {
@@ -178,32 +257,53 @@ const ProjectLineChart = ({ projects }: { projects: Project[] }) => {
   }, [projects]);
 
   const calculateStats = useCallback((projectsList: Project[]) => {
-    const totalNilai = projectsList.reduce((acc, project) => acc + project.nilai, 0);
-    const totalCost = projectsList.reduce(
-      (acc, project) => 
-        acc + 
-        project.costs.material_cost + 
-        project.costs.manpower_cost + 
-        project.costs.machine_cost + 
-        project.costs.other_cost, 
-      0
-    );
+    const totalNilai = projectsList.reduce((acc, project) => {
+      const nilai = project?.nilai || 0;
+      return acc + nilai;
+    }, 0);
+
+    const totalCost = projectsList.reduce((acc, project) => {
+      const costs = project?.costs || {};
+      return acc + 
+        (costs.material_cost || 0) + 
+        (costs.manpower_cost || 0) + 
+        (costs.machine_cost || 0) + 
+        (costs.other_cost || 0);
+    }, 0);
+
     const projectStatusCount: { [key: string]: number } = {};
     projectsList.forEach(project => {
-      projectStatusCount[project.project_status || "N/A"] = (projectStatusCount[project.project_status || "N/A"] || 0) + 1;
+      const status = project?.project_status || "N/A";
+      projectStatusCount[status] = (projectStatusCount[status] || 0) + 1;
     });
 
-    const totalCostBreakdown: { [key: string]: number } = {}
-    projectsList.forEach(project => {
-        totalCostBreakdown['Material'] = (totalCostBreakdown['Material'] || 0) + project.costs.material_cost;
-        totalCostBreakdown['Manpower'] = (totalCostBreakdown['Manpower'] || 0) + project.costs.manpower_cost;
-        totalCostBreakdown['Machine'] = (totalCostBreakdown['Machine'] || 0) + project.costs.machine_cost;
-        totalCostBreakdown['Misc'] = (totalCostBreakdown['Misc'] || 0) + project.costs.other_cost;
-    })
+    const totalCostBreakdown: { [key: string]: number } = {
+      'Material': 0,
+      'Manpower': 0,
+      'Machine': 0,
+      'Misc': 0
+    };
 
+    projectsList.forEach(project => {
+      const costs = project?.costs || {};
+      totalCostBreakdown['Material'] += costs.material_cost || 0;
+      totalCostBreakdown['Manpower'] += costs.manpower_cost || 0;
+      totalCostBreakdown['Machine'] += costs.machine_cost || 0;
+      totalCostBreakdown['Misc'] += costs.other_cost || 0;
+    });
 
     return { totalNilai, totalCost, projectStatusCount, totalCostBreakdown };
-  },[]);
+  }, []);
+
+  const calculateYAxisDomain = (filteredProjects: Project[]) => {
+    const values = filteredProjects.map(project => project.nilai);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    
+    // Add 10% padding to the top and bottom
+    const padding = (maxValue - minValue) * 0.1;
+    return [Math.max(0, minValue - padding), maxValue + padding];
+  };
 
   return (
     <div className="w-full h-full">
@@ -239,19 +339,19 @@ const ProjectLineChart = ({ projects }: { projects: Project[] }) => {
           <ResponsiveContainer width="100%" height={400}>
             <LineChart>
               <XAxis 
-                dataKey="start_date" 
+                dataKey="start_date"
                 tickFormatter={(value) => FormatDate(value)}
                 type="category"
                 allowDuplicatedCategory={false}
               />
               <YAxis 
                 type="number" 
-                domain={['dataMin', 'dataMax']} 
-                tickFormatter={(value) => `${(Math.round(value / 1000000)).toLocaleString()}M`} 
+                domain={calculateYAxisDomain(filteredProjects)}
+                tickFormatter={(value) => formatCurrency(value)}
               />
               <CartesianGrid strokeDasharray="3 3" />
               <Tooltip
-                formatter={(value: number) => `${(Math.round(value / 1000000)).toLocaleString()}M`}
+                formatter={(value: number) => [`${formatCurrency(value)}`, "Value"]}
                 labelFormatter={(label) => new Date(label).toLocaleDateString()}
               />
               <Legend />
